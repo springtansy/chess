@@ -54,3 +54,25 @@ for (let row = 0; row < 8; row++) {
         board.appendChild(square);
     }
 }
+
+let selectedSquare = null;
+
+const squares = document.querySelectorAll(".square");
+
+squares.forEach(square => {
+    square.addEventListener("click", () => {
+        // Clicking an empty square does nothing
+        if (!square.querySelector("img")) {
+            return;
+        }
+
+        // Remove previous selection
+        if (selectedSquare) {
+            selectedSquare.classList.remove("selected");
+        }
+
+        // Select this square
+        square.classList.add("selected");
+        selectedSquare = square;
+    });
+});
