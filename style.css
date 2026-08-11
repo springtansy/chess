@@ -40,3 +40,18 @@ body {
 .dark {
     background: #b58863;
 }
+
+.square {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.square img {
+    width: 90%;
+    height: 90%;
+    object-fit: contain;
+}
