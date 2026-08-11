@@ -55,3 +55,7 @@ body {
     height: 90%;
     object-fit: contain;
 }
+
+.square.selected {
+    box-shadow: inset 0 0 0 5px #f6d365;
+}
