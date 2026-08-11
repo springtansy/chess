@@ -61,18 +61,37 @@ const squares = document.querySelectorAll(".square");
 
 squares.forEach(square => {
     square.addEventListener("click", () => {
-        // Clicking an empty square does nothing
-        if (!square.querySelector("img")) {
+
+        // If we already selected a piece...
+        if (selectedSquare) {
+
+            // Clicking the same square deselects it
+            if (square === selectedSquare) {
+                square.classList.remove("selected");
+                selectedSquare = null;
+                return;
+            }
+
+            // Move the piece
+            const piece = selectedSquare.querySelector("img");
+
+            if (piece) {
+                square.appendChild(piece);
+            }
+
+            // Remove selection
+            selectedSquare.classList.remove("selected");
+            selectedSquare = null;
+
             return;
         }
 
-        // Remove previous selection
-        if (selectedSquare) {
-            selectedSquare.classList.remove("selected");
-        }
+        // Otherwise, select a piece
+        const piece = square.querySelector("img");
 
-        // Select this square
-        square.classList.add("selected");
-        selectedSquare = square;
+        if (piece) {
+            square.classList.add("selected");
+            selectedSquare = square;
+        }
     });
 });
