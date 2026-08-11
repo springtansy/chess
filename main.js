@@ -76,6 +76,12 @@ squares.forEach(square => {
             const piece = selectedSquare.querySelector("img");
 
             if (piece) {
+                const targetPiece = square.querySelector("img");
+
+                if (targetPiece) {
+                    targetPiece.remove();
+                }
+
                 square.appendChild(piece);
             }
 
