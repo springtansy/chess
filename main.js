@@ -449,6 +449,8 @@ function getPseudoLegalMoves(row, col) {
             }
         }
 
+        moves.push(...getCastlingMoves(row, col));
+        
         return moves;
     }
 
