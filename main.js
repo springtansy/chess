@@ -56,6 +56,7 @@ for (let row = 0; row < 8; row++) {
 }
 
 let selectedSquare = null;
+let currentTurn = "w";
 
 const squares = document.querySelectorAll(".square");
 
@@ -267,7 +268,8 @@ squares.forEach((square, index) => {
 
         // Selecting a piece
         if (!selectedSquare) {
-            if (startingPosition[row][col]) {
+            const piece = startingPosition[row][col];
+            if (piece && piece[0] === currentTurn) {
                 selectedSquare = square;
                 square.classList.add("selected");
             }
@@ -288,6 +290,7 @@ squares.forEach((square, index) => {
         );
 
         if (isLegal) {
+            
             // Move the piece in the game state
             startingPosition[row][col] =
             startingPosition[selectedRow][selectedCol];
@@ -320,6 +323,9 @@ squares.forEach((square, index) => {
 
             piece.src = pieces[startingPosition[row][col]];
             piece.alt = startingPosition[row][col];
+
+            // Update turn
+            currentTurn = currentTurn === "w" ? "b" : "w";
         }
 
         selectedSquare.classList.remove("selected");
