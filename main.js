@@ -72,6 +72,46 @@ function promotePawn(row, col) {
     startingPosition[row][col] = promotedPiece;
 }
 
+function getSlidingMoves(row, col, directions) {
+    const moves = [];
+    const piece = startingPosition[row][col];
+
+    if (!piece) {
+        return moves;
+    }
+
+    for (const [rowDirection, colDirection] of directions) {
+        let newRow = row + rowDirection;
+        let newCol = col + colDirection;
+
+        while (
+            newRow >= 0 &&
+            newRow < 8 &&
+            newCol >= 0 &&
+            newCol < 8
+        ) {
+            const target = startingPosition[newRow][newCol];
+
+            // Empty square — keep going
+            if (!target) {
+                moves.push([newRow, newCol]);
+            } else {
+                // Enemy piece — can capture, but can't go farther
+                if (target[0] !== piece[0]) {
+                    moves.push([newRow, newCol]);
+                }
+
+                break;
+            }
+
+            newRow += rowDirection;
+            newCol += colDirection;
+        }
+    }
+
+    return moves;
+}
+
 function getLegalMoves(row, col) {
     const piece = startingPosition[row][col];
 
@@ -81,7 +121,15 @@ function getLegalMoves(row, col) {
 
     const moves = [];
 
-    // Only pawns for now
+    if (piece === "wR" || piece === "bR") {
+        return getSlidingMoves(row, col, [
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1]
+        ]);
+    }
+
     if (piece === "wP" || piece === "bP") {
         const direction = piece === "wP" ? -1 : 1;
         const startRow = piece === "wP" ? 6 : 1;
