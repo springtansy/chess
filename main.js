@@ -29,6 +29,13 @@ const startingPosition = [
 
 let currentPosition = startingPosition;
 
+let castlingRights = {
+    wK: true,
+    wQ: true,
+    bK: true,
+    bQ: true
+};
+
 for (let row = 0; row < 8; row++) {
     for (let col = 0; col < 8; col++) {
 
@@ -73,6 +80,55 @@ function promotePawn(row, col) {
     const promotedPiece = pawn[0] === "w" ? "wQ" : "bQ";
 
     currentPosition[row][col] = promotedPiece;
+}
+
+function updateCastlingRights(
+    fromRow, fromCol,
+    toRow, toCol
+) {
+    if (
+        (fromRow === 7 && fromCol === 0) ||
+        (toRow === 7 && toCol === 0)
+    ) {
+        castlingRights.wQ = false;
+    }
+
+    if (
+        (fromRow === 0 && fromCol === 0) ||
+        (toRow === 0 && toCol === 0)
+    ) {
+        castlingRights.bQ = false;
+    }
+
+    if (
+        (fromRow === 7 && fromCol === 7) ||
+        (toRow === 7 && toCol === 7)
+    ) {
+        castlingRights.wK = false;
+    }
+
+    if (
+        (fromRow === 0 && fromCol === 7) ||
+        (toRow === 0 && toCol === 7)
+    ) {
+        castlingRights.bK = false;
+    }
+
+    if (
+        (fromRow === 0 && fromCol === 4) ||
+        (toRow === 0 && toCol === 4)
+    ) {
+        castlingRights.bK = false;
+        castlingRights.bQ = false;
+    }
+
+    if (
+        (fromRow === 7 && fromCol === 4) ||
+        (toRow === 7 && toCol === 4)
+    ) {
+        castlingRights.wK = false;
+        castlingRights.wQ = false;
+    }
 }
 
 function getSlidingAttacks(row, col, directions) {
@@ -291,6 +347,43 @@ function findKing(color) {
     return null;
 }
 
+function getCastlingMoves(row, col) {
+    const moves = [];
+    const piece = currentPosition[row][col];
+
+    if (piece !== "wK" && piece !== "bK") {
+        return moves;
+    }
+
+    const color = piece[0];
+    const enemyColor = color === "w" ? "b" : "w";
+
+    if (((color === "w" && castlingRights.wK === true) || (color === "b" && castlingRights.bK === true) && currentPosition[row][7] === color + "R") && 
+        !isSquareAttacked(row,4,enemyColor) && 
+        !isSquareAttacked(row,5,enemyColor) && 
+        !isSquareAttacked(row,6,enemyColor)) {
+        const squareA = currentPosition[row][5];
+        const squareB = currentPosition[row][6];
+        if (!squareA && !squareB) {
+            moves.push([row, 6]);
+        }
+    }
+
+    if (((color === "w" && castlingRights.wQ === true) || (color === "b" && castlingRights.bQ === true) && currentPosition[row][0] === color + "R") && 
+        !isSquareAttacked(row,4,enemyColor) && 
+        !isSquareAttacked(row,3,enemyColor) && 
+        !isSquareAttacked(row,2,enemyColor)) {
+        const squareA = currentPosition[row][3];
+        const squareB = currentPosition[row][2];
+        const squareC = currentPosition[row][1];
+        if (!squareA && !squareB && !squareC) {
+            moves.push([row, 2]);
+        }
+    }
+    
+    return moves;
+}
+
 function isInCheck(color) {
     const kingPosition = findKing(color);
 
@@ -478,6 +571,34 @@ function getLegalMoves(row, col) {
     });
 }
 
+function hasLegalMoves(color) {
+    for (let pieceRow = 0; pieceRow < 8; pieceRow++) {
+        for (let pieceCol = 0; pieceCol < 8; pieceCol++) {
+            const piece = currentPosition[pieceRow][pieceCol];
+
+            if (!piece || piece[0] !== color) {
+                continue;
+            }
+
+            const moves = getLegalMoves(pieceRow, pieceCol);
+
+            if (moves.length > 0) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+function isCheckmate(color) {
+    return isInCheck(color) && !hasLegalMoves(color);
+}
+
+function isStalemate(color) {
+    return !isInCheck(color) && !hasLegalMoves(color);
+}
+
 function clearMoveHighlights() {
     squares.forEach(square => {
         square.classList.remove("move-option");
@@ -524,6 +645,13 @@ squares.forEach((square, index) => {
         );
 
         if (isLegal) {
+
+            updateCastlingRights(
+                selectedRow,
+                selectedCol,
+                row,
+                col
+            );
             
             currentPosition[row][col] =
             currentPosition[selectedRow][selectedCol];
@@ -556,6 +684,14 @@ squares.forEach((square, index) => {
             piece.alt = currentPosition[row][col];
 
             currentTurn = currentTurn === "w" ? "b" : "w";
+
+            if (isCheckmate(currentTurn)) {
+                console.log("Checkmate!");
+            }
+
+            if (isStalemate(currentTurn)) {
+                console.log("Stalemate!");
+            }
         }
 
         selectedSquare.classList.remove("selected");
