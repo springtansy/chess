@@ -75,6 +75,41 @@ function promotePawn(row, col) {
     currentPosition[row][col] = promotedPiece;
 }
 
+function getSlidingAttacks(row, col, directions) {
+    const moves = [];
+    const piece = currentPosition[row][col];
+
+    if (!piece) {
+        return moves;
+    }
+
+    for (const [rowDirection, colDirection] of directions) {
+        let newRow = row + rowDirection;
+        let newCol = col + colDirection;
+
+        while (
+            newRow >= 0 &&
+            newRow < 8 &&
+            newCol >= 0 &&
+            newCol < 8
+        ) {
+            const target = currentPosition[newRow][newCol];
+
+            if (!target) {
+                moves.push([newRow, newCol]);
+            } else {
+                moves.push([newRow, newCol]);
+                break;
+            }
+
+            newRow += rowDirection;
+            newCol += colDirection;
+        }
+    }
+
+    return moves;
+}
+
 function getSlidingMoves(row, col, directions) {
     const moves = [];
     const piece = currentPosition[row][col];
@@ -113,7 +148,181 @@ function getSlidingMoves(row, col, directions) {
     return moves;
 }
 
-function getLegalMoves(row, col) {
+function getAttackSquares(row, col) {
+    const piece = currentPosition[row][col];
+
+    if (!piece) {
+        return [];
+    }
+
+    const moves = [];
+
+    if (piece === "wK" || piece === "bK") {
+        const directions = [[0, 1],[0, -1],[-1, 0],[1, 0],[1, 1],[1, -1],[-1, 1],[-1, -1],];
+
+        for (const [rowDirection, colDirection] of directions) {
+            let newRow = row + rowDirection;
+            let newCol = col + colDirection;
+
+            if (
+                newRow >= 0 &&
+                newRow < 8 &&
+                newCol >= 0 &&
+                newCol < 8
+            ) {
+                const target = currentPosition[newRow][newCol];
+                moves.push([newRow, newCol]);
+            }
+        }
+
+        return moves;
+    }
+
+    if (piece === "wN" || piece === "bN") {
+        const directions = [[2, 1],[2, -1],[-2, 1],[-2, -1],[1, 2],[1, -2],[-1, 2],[-1, -2],];
+
+        for (const [rowDirection, colDirection] of directions) {
+            let newRow = row + rowDirection;
+            let newCol = col + colDirection;
+
+            if (
+                newRow >= 0 &&
+                newRow < 8 &&
+                newCol >= 0 &&
+                newCol < 8
+            ) {
+                const target = currentPosition[newRow][newCol];
+                moves.push([newRow, newCol]);
+            }
+        }
+
+        return moves;
+    }
+
+    if (piece === "wR" || piece === "bR") {
+        return getSlidingAttacks(row, col, [
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1]
+        ]);
+    }
+
+    if (piece === "wB" || piece === "bB") {
+        return getSlidingAttacks(row, col, [
+            [1, 1],
+            [-1, 1],
+            [-1, -1],
+            [1, -1]
+        ]);
+    }
+
+    if (piece === "wQ" || piece === "bQ") {
+        return getSlidingAttacks(row, col, [
+            [1, 1],
+            [-1, 1],
+            [-1, -1],
+            [1, -1],
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1]
+        ]);
+    }
+
+    if (piece === "wP" || piece === "bP") {
+        const direction = piece === "wP" ? -1 : 1;
+        const oneRow = row + direction;
+
+        for (const columnChange of [-1, 1]) {
+            const targetCol = col + columnChange;
+
+            if (
+                oneRow >= 0 &&
+                oneRow < 8 &&
+                targetCol >= 0 &&
+                targetCol < 8
+            ) {
+                const target = currentPosition[oneRow][targetCol];
+                moves.push([oneRow, targetCol]);
+            }
+        }
+    }
+
+    return moves;
+}
+
+function isSquareAttacked(row, col, byColor) {
+    for (let pieceRow = 0; pieceRow < 8; pieceRow++) {
+        for (let pieceCol = 0; pieceCol < 8; pieceCol++) {
+            const piece = currentPosition[pieceRow][pieceCol];
+
+            if (!piece || piece[0] !== byColor) {
+                continue;
+            }
+
+            const attacks = getAttackSquares(pieceRow, pieceCol);
+
+            if (
+                attacks.some(
+                    ([attackRow, attackCol]) =>
+                        attackRow === row && attackCol === col
+                )
+            ) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+function findKing(color) {
+    const king = color + "K";
+
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            if (currentPosition[row][col] === king) {
+                return [row, col];
+            }
+        }
+    }
+
+    return null;
+}
+
+function isInCheck(color) {
+    const kingPosition = findKing(color);
+
+    if (!kingPosition) {
+        return false;
+    }
+
+    const [kingRow, kingCol] = kingPosition;
+
+    const enemyColor = color === "w" ? "b" : "w";
+
+    return isSquareAttacked(kingRow, kingCol, enemyColor);
+}
+
+function moveLeavesKingInCheck(fromRow, fromCol, toRow, toCol) {
+    const movingPiece = currentPosition[fromRow][fromCol];
+    const capturedPiece = currentPosition[toRow][toCol];
+
+    // Make the temporary move
+    currentPosition[toRow][toCol] = movingPiece;
+    currentPosition[fromRow][fromCol] = null;
+
+    const inCheck = isInCheck(movingPiece[0]);
+
+    // Undo the move
+    currentPosition[fromRow][fromCol] = movingPiece;
+    currentPosition[toRow][toCol] = capturedPiece;
+
+    return inCheck;
+}
+
+function getPseudoLegalMoves(row, col) {
     const piece = currentPosition[row][col];
 
     if (!piece) {
@@ -254,6 +463,19 @@ function getLegalMoves(row, col) {
     }
 
     return moves;
+}
+
+function getLegalMoves(row, col) {
+    const moves = getPseudoLegalMoves(row, col);
+
+    return moves.filter(([moveRow, moveCol]) => {
+        return !moveLeavesKingInCheck(
+            row,
+            col,
+            moveRow,
+            moveCol
+        );
+    });
 }
 
 function clearMoveHighlights() {
