@@ -130,6 +130,28 @@ function getLegalMoves(row, col) {
         ]);
     }
 
+    if (piece === "wB" || piece === "bB") {
+        return getSlidingMoves(row, col, [
+            [1, 1],
+            [-1, 1],
+            [-1, -1],
+            [1, -1]
+        ]);
+    }
+
+    if (piece === "wQ" || piece === "bQ") {
+        return getSlidingMoves(row, col, [
+            [1, 1],
+            [-1, 1],
+            [-1, -1],
+            [1, -1],
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1]
+        ]);
+    }
+
     if (piece === "wP" || piece === "bP") {
         const direction = piece === "wP" ? -1 : 1;
         const startRow = piece === "wP" ? 6 : 1;
