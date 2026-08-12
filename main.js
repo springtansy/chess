@@ -648,6 +648,11 @@ squares.forEach((square, index) => {
 
         if (isLegal) {
 
+            const isCastling =
+                (currentPosition[selectedRow][selectedCol] === "wK" ||
+                 currentPosition[selectedRow][selectedCol] === "bK") &&
+                Math.abs(col - selectedCol) === 2;
+
             updateCastlingRights(
                 selectedRow,
                 selectedCol,
@@ -670,6 +675,32 @@ squares.forEach((square, index) => {
                 currentPosition[row][col] === "bP" && row === 7
             ) {
                 promotePawn(row, col);
+            }
+
+            if (isCastling) {
+                if (col === 6) {
+                    // Kingside
+                    currentPosition[row][5] = currentPosition[row][7];
+                    currentPosition[row][7] = null;
+                } else if (col === 2) {
+                    // Queenside
+                    currentPosition[row][3] = currentPosition[row][0];
+                    currentPosition[row][0] = null;
+                }
+            }
+
+            if (isCastling) {
+                const rookFromCol = col === 6 ? 7 : 0;
+                const rookToCol = col === 6 ? 5 : 3;
+
+                const rookFromSquare = squares[row * 8 + rookFromCol];
+                const rookToSquare = squares[row * 8 + rookToCol];
+
+                const rook = rookFromSquare.querySelector("img");
+
+                if (rook) {
+                    rookToSquare.appendChild(rook);
+                }
             }
 
             const piece = selectedSquare.querySelector("img");
