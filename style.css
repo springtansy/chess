@@ -59,9 +59,9 @@ body {
 }
 
 .square.selected {
-    box-shadow: inset 0 0 0 5px #f6d365;
+    box-shadow: inset 0 0 0 5px #ccc;
 }
 
 .square.move-option {
-    box-shadow: inset 0 0 0 5px rgba(180, 130, 20, 0.95);
+    box-shadow: inset 0 0 0 5px #555;
 }
