@@ -59,45 +59,113 @@ let selectedSquare = null;
 
 const squares = document.querySelectorAll(".square");
 
-squares.forEach(square => {
-    square.addEventListener("click", () => {
+function getLegalMoves(row, col) {
+    const piece = startingPosition[row][col];
 
-        // If we already selected a piece...
-        if (selectedSquare) {
+    if (!piece) {
+        return [];
+    }
 
-            // Clicking the same square deselects it
-            if (square === selectedSquare) {
-                square.classList.remove("selected");
-                selectedSquare = null;
-                return;
+    const moves = [];
+
+    // Only pawns for now
+    if (piece === "wP" || piece === "bP") {
+        const direction = piece === "wP" ? -1 : 1;
+        const startRow = piece === "wP" ? 6 : 1;
+
+        // One square forward
+        const oneRow = row + direction;
+
+        if (
+            oneRow >= 0 &&
+            oneRow < 8 &&
+            startingPosition[oneRow][col] === null
+        ) {
+            moves.push([oneRow, col]);
+
+            // Two squares forward from starting position
+            const twoRow = row + direction * 2;
+
+            if (
+                row === startRow &&
+                startingPosition[twoRow][col] === null
+            ) {
+                moves.push([twoRow, col]);
             }
+        }
 
-            // Move the piece
-            const piece = selectedSquare.querySelector("img");
+        // Diagonal captures
+        for (const columnChange of [-1, 1]) {
+            const targetCol = col + columnChange;
 
-            if (piece) {
-                const targetPiece = square.querySelector("img");
+            if (
+                oneRow >= 0 &&
+                oneRow < 8 &&
+                targetCol >= 0 &&
+                targetCol < 8
+            ) {
+                const target = startingPosition[oneRow][targetCol];
 
-                if (targetPiece) {
-                    targetPiece.remove();
+                if (
+                    target &&
+                    target[0] !== piece[0]
+                ) {
+                    moves.push([oneRow, targetCol]);
                 }
-
-                square.appendChild(piece);
             }
+        }
+    }
 
-            // Remove selection
-            selectedSquare.classList.remove("selected");
-            selectedSquare = null;
+    return moves;
+}
+
+squares.forEach((square, index) => {
+    square.addEventListener("click", () => {
+        const row = Math.floor(index / 8);
+        const col = index % 8;
+
+        // Selecting a piece
+        if (!selectedSquare) {
+            if (startingPosition[row][col]) {
+                selectedSquare = square;
+                square.classList.add("selected");
+            }
 
             return;
         }
 
-        // Otherwise, select a piece
-        const piece = square.querySelector("img");
+        // Find the selected square's coordinates
+        const selectedIndex = [...squares].indexOf(selectedSquare);
+        const selectedRow = Math.floor(selectedIndex / 8);
+        const selectedCol = selectedIndex % 8;
 
-        if (piece) {
-            square.classList.add("selected");
-            selectedSquare = square;
+        const legalMoves = getLegalMoves(selectedRow, selectedCol);
+
+        const isLegal = legalMoves.some(
+            ([moveRow, moveCol]) =>
+                moveRow === row && moveCol === col
+        );
+
+        if (isLegal) {
+            // Move the piece in the game state
+            startingPosition[row][col] =
+                startingPosition[selectedRow][selectedCol];
+
+            startingPosition[selectedRow][selectedCol] = null;
+
+            // Update the visual board
+            const piece = selectedSquare.querySelector("img");
+
+            const capturedPiece = square.querySelector("img");
+
+            if (capturedPiece) {
+                capturedPiece.remove();
+            }
+
+            square.appendChild(piece);
         }
+
+        selectedSquare.classList.remove("selected");
+        selectedSquare = null;
     });
 });
