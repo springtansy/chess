@@ -29,6 +29,8 @@ const startingPosition = [
 
 let currentPosition = startingPosition;
 
+let lastMove = null;
+
 let castlingRights = {
     wK: true,
     wQ: true,
@@ -358,7 +360,7 @@ function getCastlingMoves(row, col) {
     const color = piece[0];
     const enemyColor = color === "w" ? "b" : "w";
 
-    if (((color === "w" && castlingRights.wK === true) || (color === "b" && castlingRights.bK === true) && currentPosition[row][7] === color + "R") && 
+    if ((((color === "w" && castlingRights.wK === true) || (color === "b" && castlingRights.bK === true)) && currentPosition[row][7] === color + "R") && 
         !isSquareAttacked(row,4,enemyColor) && 
         !isSquareAttacked(row,5,enemyColor) && 
         !isSquareAttacked(row,6,enemyColor)) {
@@ -369,7 +371,7 @@ function getCastlingMoves(row, col) {
         }
     }
 
-    if (((color === "w" && castlingRights.wQ === true) || (color === "b" && castlingRights.bQ === true) && currentPosition[row][0] === color + "R") && 
+    if ((((color === "w" && castlingRights.wQ === true) || (color === "b" && castlingRights.bQ === true)) && currentPosition[row][0] === color + "R") && 
         !isSquareAttacked(row,4,enemyColor) && 
         !isSquareAttacked(row,3,enemyColor) && 
         !isSquareAttacked(row,2,enemyColor)) {
@@ -413,6 +415,43 @@ function moveLeavesKingInCheck(fromRow, fromCol, toRow, toCol) {
     currentPosition[toRow][toCol] = capturedPiece;
 
     return inCheck;
+}
+
+function getEnPassantMoves(row, col) {
+    const moves = [];
+    const piece = currentPosition[row][col];
+
+    if (!piece || piece[1] !== "P") {
+        return moves;
+    }
+
+    if (!lastMove || lastMove.piece[1] !== "P") {
+        return moves;
+    }
+
+    if (Math.abs(lastMove.toRow - lastMove.fromRow) !== 2) {
+        return moves;
+    }
+
+    if (lastMove.piece[0] === piece[0]) {
+        return moves;
+    }
+
+    if (
+        Math.abs(lastMove.toCol - col) !== 1 ||
+        lastMove.toRow !== row
+    ) {
+        return moves;
+    }
+
+    const direction = piece[0] === "w" ? -1 : 1;
+
+    moves.push([
+        row + direction,
+        lastMove.toCol
+    ]);
+
+    return moves;
 }
 
 function getPseudoLegalMoves(row, col) {
@@ -555,6 +594,7 @@ function getPseudoLegalMoves(row, col) {
                 }
             }
         }
+        moves.push(...getEnPassantMoves(row, col));
     }
 
     return moves;
@@ -648,10 +688,16 @@ squares.forEach((square, index) => {
 
         if (isLegal) {
 
+            const movingPiece = currentPosition[selectedRow][selectedCol];
+
             const isCastling =
-                (currentPosition[selectedRow][selectedCol] === "wK" ||
-                 currentPosition[selectedRow][selectedCol] === "bK") &&
+                movingPiece[1] === "K" &&
                 Math.abs(col - selectedCol) === 2;
+
+            const isEnPassant =
+                movingPiece[1] === "P" &&
+                col !== selectedCol &&
+                currentPosition[row][col] === null;
 
             updateCastlingRights(
                 selectedRow,
@@ -660,19 +706,26 @@ squares.forEach((square, index) => {
                 col
             );
             
-            currentPosition[row][col] =
-            currentPosition[selectedRow][selectedCol];
+            currentPosition[row][col] = movingPiece;
 
             currentPosition[selectedRow][selectedCol] = null;
 
-            if (
-                currentPosition[row][col] === "wP" && row === 0
-            ) {
-                promotePawn(row, col);
+            if (isEnPassant) {
+                currentPosition[selectedRow][col] = null;
+            }
+
+            if (isEnPassant) {
+                const capturedSquare = squares[selectedRow * 8 + col];
+                const capturedPawn = capturedSquare.querySelector("img");
+
+                if (capturedPawn) {
+                    capturedPawn.remove();
+                }
             }
 
             if (
-                currentPosition[row][col] === "bP" && row === 7
+                movingPiece[1] === "P" &&
+                (row === 0 || row === 7)
             ) {
                 promotePawn(row, col);
             }
@@ -706,6 +759,14 @@ squares.forEach((square, index) => {
             const piece = selectedSquare.querySelector("img");
 
             const capturedPiece = square.querySelector("img");
+
+            lastMove = {
+                fromRow: selectedRow,
+                fromCol: selectedCol,
+                toRow: row,
+                toCol: col,
+                piece: movingPiece
+            };
 
             if (capturedPiece) {
                 capturedPiece.remove();
