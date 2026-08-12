@@ -261,6 +261,21 @@ function getLegalMoves(row, col) {
     return moves;
 }
 
+function clearMoveHighlights() {
+    squares.forEach(square => {
+        square.classList.remove("move-option");
+    });
+}
+
+function showMoveHighlights(moves) {
+    clearMoveHighlights();
+
+    for (const [row, col] of moves) {
+        const index = row * 8 + col;
+        squares[index].classList.add("move-option");
+    }
+}
+
 squares.forEach((square, index) => {
     square.addEventListener("click", () => {
         const row = Math.floor(index / 8);
@@ -269,9 +284,13 @@ squares.forEach((square, index) => {
         // Selecting a piece
         if (!selectedSquare) {
             const piece = startingPosition[row][col];
+
             if (piece && piece[0] === currentTurn) {
                 selectedSquare = square;
                 square.classList.add("selected");
+
+                const legalMoves = getLegalMoves(row, col);
+                showMoveHighlights(legalMoves);
             }
 
             return;
@@ -329,6 +348,7 @@ squares.forEach((square, index) => {
         }
 
         selectedSquare.classList.remove("selected");
-        selectedSquare = null;
+        clearMoveHighlights();
+        selectedSquare = null;    
     });
 });
