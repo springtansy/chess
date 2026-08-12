@@ -27,6 +27,8 @@ const startingPosition = [
     ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]
 ];
 
+let currentPosition = startingPosition;
+
 for (let row = 0; row < 8; row++) {
     for (let col = 0; col < 8; col++) {
 
@@ -40,7 +42,7 @@ for (let row = 0; row < 8; row++) {
             square.classList.add("dark");
         }
 
-        const piece = startingPosition[row][col];
+        const piece = currentPosition[row][col];
 
         if (piece) {
             const image = document.createElement("img");
@@ -61,21 +63,21 @@ let currentTurn = "w";
 const squares = document.querySelectorAll(".square");
 
 function promotePawn(row, col) {
-    const pawn = startingPosition[row][col];
+    const pawn = currentPosition[row][col];
 
     if (pawn !== "wP" && pawn !== "bP") {
         return;
     }
 
-    // Promote to a queen
+    // Queen promotion only, fix later
     const promotedPiece = pawn[0] === "w" ? "wQ" : "bQ";
 
-    startingPosition[row][col] = promotedPiece;
+    currentPosition[row][col] = promotedPiece;
 }
 
 function getSlidingMoves(row, col, directions) {
     const moves = [];
-    const piece = startingPosition[row][col];
+    const piece = currentPosition[row][col];
 
     if (!piece) {
         return moves;
@@ -91,13 +93,11 @@ function getSlidingMoves(row, col, directions) {
             newCol >= 0 &&
             newCol < 8
         ) {
-            const target = startingPosition[newRow][newCol];
+            const target = currentPosition[newRow][newCol];
 
-            // Empty square — keep going
             if (!target) {
                 moves.push([newRow, newCol]);
             } else {
-                // Enemy piece — can capture, but can't go farther
                 if (target[0] !== piece[0]) {
                     moves.push([newRow, newCol]);
                 }
@@ -114,7 +114,7 @@ function getSlidingMoves(row, col, directions) {
 }
 
 function getLegalMoves(row, col) {
-    const piece = startingPosition[row][col];
+    const piece = currentPosition[row][col];
 
     if (!piece) {
         return [];
@@ -135,9 +135,8 @@ function getLegalMoves(row, col) {
                 newCol >= 0 &&
                 newCol < 8
             ) {
-                const target = startingPosition[newRow][newCol];
+                const target = currentPosition[newRow][newCol];
 
-                // Empty square
                 if (!target) {
                     moves.push([newRow, newCol]);
                 } else {
@@ -164,9 +163,8 @@ function getLegalMoves(row, col) {
                 newCol >= 0 &&
                 newCol < 8
             ) {
-                const target = startingPosition[newRow][newCol];
+                const target = currentPosition[newRow][newCol];
 
-                // Empty square
                 if (!target) {
                     moves.push([newRow, newCol]);
                 } else {
@@ -215,28 +213,25 @@ function getLegalMoves(row, col) {
         const direction = piece === "wP" ? -1 : 1;
         const startRow = piece === "wP" ? 6 : 1;
 
-        // One square forward
         const oneRow = row + direction;
 
         if (
             oneRow >= 0 &&
             oneRow < 8 &&
-            startingPosition[oneRow][col] === null
+            currentPosition[oneRow][col] === null
         ) {
             moves.push([oneRow, col]);
 
-            // Two squares forward from starting position
             const twoRow = row + direction * 2;
 
             if (
                 row === startRow &&
-                startingPosition[twoRow][col] === null
+                currentPosition[twoRow][col] === null
             ) {
                 moves.push([twoRow, col]);
             }
         }
 
-        // Diagonal captures
         for (const columnChange of [-1, 1]) {
             const targetCol = col + columnChange;
 
@@ -246,7 +241,7 @@ function getLegalMoves(row, col) {
                 targetCol >= 0 &&
                 targetCol < 8
             ) {
-                const target = startingPosition[oneRow][targetCol];
+                const target = currentPosition[oneRow][targetCol];
 
                 if (
                     target &&
@@ -281,9 +276,8 @@ squares.forEach((square, index) => {
         const row = Math.floor(index / 8);
         const col = index % 8;
 
-        // Selecting a piece
         if (!selectedSquare) {
-            const piece = startingPosition[row][col];
+            const piece = currentPosition[row][col];
 
             if (piece && piece[0] === currentTurn) {
                 selectedSquare = square;
@@ -296,7 +290,6 @@ squares.forEach((square, index) => {
             return;
         }
 
-        // Find the selected square's coordinates
         const selectedIndex = [...squares].indexOf(selectedSquare);
         const selectedRow = Math.floor(selectedIndex / 8);
         const selectedCol = selectedIndex % 8;
@@ -310,26 +303,23 @@ squares.forEach((square, index) => {
 
         if (isLegal) {
             
-            // Move the piece in the game state
-            startingPosition[row][col] =
-            startingPosition[selectedRow][selectedCol];
+            currentPosition[row][col] =
+            currentPosition[selectedRow][selectedCol];
 
-            startingPosition[selectedRow][selectedCol] = null;
+            currentPosition[selectedRow][selectedCol] = null;
 
-            // Promote pawns that reach the last rank
             if (
-                startingPosition[row][col] === "wP" && row === 0
+                currentPosition[row][col] === "wP" && row === 0
             ) {
                 promotePawn(row, col);
             }
 
             if (
-                startingPosition[row][col] === "bP" && row === 7
+                currentPosition[row][col] === "bP" && row === 7
             ) {
                 promotePawn(row, col);
             }
 
-            // Update the visual board
             const piece = selectedSquare.querySelector("img");
 
             const capturedPiece = square.querySelector("img");
@@ -340,10 +330,9 @@ squares.forEach((square, index) => {
 
             square.appendChild(piece);
 
-            piece.src = pieces[startingPosition[row][col]];
-            piece.alt = startingPosition[row][col];
+            piece.src = pieces[currentPosition[row][col]];
+            piece.alt = currentPosition[row][col];
 
-            // Update turn
             currentTurn = currentTurn === "w" ? "b" : "w";
         }
 
