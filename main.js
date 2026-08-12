@@ -59,6 +59,19 @@ let selectedSquare = null;
 
 const squares = document.querySelectorAll(".square");
 
+function promotePawn(row, col) {
+    const pawn = startingPosition[row][col];
+
+    if (pawn !== "wP" && pawn !== "bP") {
+        return;
+    }
+
+    // Promote to a queen
+    const promotedPiece = pawn[0] === "w" ? "wQ" : "bQ";
+
+    startingPosition[row][col] = promotedPiece;
+}
+
 function getLegalMoves(row, col) {
     const piece = startingPosition[row][col];
 
@@ -149,9 +162,22 @@ squares.forEach((square, index) => {
         if (isLegal) {
             // Move the piece in the game state
             startingPosition[row][col] =
-                startingPosition[selectedRow][selectedCol];
+            startingPosition[selectedRow][selectedCol];
 
             startingPosition[selectedRow][selectedCol] = null;
+
+            // Promote pawns that reach the last rank
+            if (
+                startingPosition[row][col] === "wP" && row === 0
+            ) {
+                promotePawn(row, col);
+            }
+
+            if (
+                startingPosition[row][col] === "bP" && row === 7
+            ) {
+                promotePawn(row, col);
+            }
 
             // Update the visual board
             const piece = selectedSquare.querySelector("img");
@@ -163,6 +189,9 @@ squares.forEach((square, index) => {
             }
 
             square.appendChild(piece);
+
+            piece.src = pieces[startingPosition[row][col]];
+            piece.alt = startingPosition[row][col];
         }
 
         selectedSquare.classList.remove("selected");
