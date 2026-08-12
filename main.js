@@ -121,6 +121,35 @@ function getLegalMoves(row, col) {
 
     const moves = [];
 
+    if (piece === "wK" || piece === "bK") {
+        const directions = [[0, 1],[0, -1],[-1, 0],[1, 0],[1, 1],[1, -1],[-1, 1],[-1, -1],];
+
+        for (const [rowDirection, colDirection] of directions) {
+            let newRow = row + rowDirection;
+            let newCol = col + colDirection;
+
+            if (
+                newRow >= 0 &&
+                newRow < 8 &&
+                newCol >= 0 &&
+                newCol < 8
+            ) {
+                const target = startingPosition[newRow][newCol];
+
+                // Empty square
+                if (!target) {
+                    moves.push([newRow, newCol]);
+                } else {
+                    if (target[0] !== piece[0]) {
+                        moves.push([newRow, newCol]);
+                    }
+                }
+            }
+        }
+
+        return moves;
+    }
+
     if (piece === "wN" || piece === "bN") {
         const directions = [[2, 1],[2, -1],[-2, 1],[-2, -1],[1, 2],[1, -2],[-1, 2],[-1, -2],];
 
