@@ -70,6 +70,10 @@ let selectedSquare = null;
 let currentTurn = "w";
 let gameOver = false;
 
+const gameOverScreen = document.getElementById("game-over");
+const gameOverTitle = document.getElementById("game-over-title");
+const gameOverMessage = document.getElementById("game-over-message");
+const newGameButton = document.getElementById("new-game");
 const squares = document.querySelectorAll(".square");
 
 function promotePawn(row, col) {
@@ -83,6 +87,14 @@ function promotePawn(row, col) {
     const promotedPiece = pawn[0] === "w" ? "wQ" : "bQ";
 
     currentPosition[row][col] = promotedPiece;
+}
+
+function showGameOver(title, message) {
+    gameOverTitle.textContent = title;
+    gameOverMessage.textContent = message;
+
+    gameOverScreen.classList.remove("hidden");
+    gameOver = true;
 }
 
 function updateCastlingRights(
@@ -785,14 +797,17 @@ squares.forEach((square, index) => {
             currentTurn = currentTurn === "w" ? "b" : "w";
 
             if (isCheckmate(currentTurn)) {
-                gameOver = true;
-
                 const winner = currentTurn === "w" ? "Black" : "White";
-                console.log(`Checkmate! ${winner} wins.`);
-            } else if (isStalemate(currentTurn)) {
-                gameOver = true;
 
-                console.log("Draw! Stalemate.");
+                showGameOver(
+                    "Checkmate!",
+                    `${winner} wins.`
+                );
+            } else if (isStalemate(currentTurn)) {
+                showGameOver(
+                    "Draw",
+                    "Stalemate."
+                );
             }
         }
 
