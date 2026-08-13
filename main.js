@@ -27,7 +27,7 @@ const startingPosition = [
     ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]
 ];
 
-let currentPosition = startingPosition;
+let currentPosition = startingPosition.map(row => [...row]);
 
 let lastMove = null;
 
@@ -861,4 +861,5 @@ squares.forEach((square, index) => {
 newGameButton.addEventListener("click", () => {
     console.log("New Game clicked");
     resetGame();
+    console.log(currentPosition);
 });
