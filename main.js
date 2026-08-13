@@ -68,6 +68,7 @@ for (let row = 0; row < 8; row++) {
 
 let selectedSquare = null;
 let currentTurn = "w";
+let gameOver = false;
 
 const squares = document.querySelectorAll(".square");
 
@@ -658,6 +659,10 @@ function showMoveHighlights(moves) {
 
 squares.forEach((square, index) => {
     square.addEventListener("click", () => {
+
+        if (gameOver) {
+            return;
+        }
         const row = Math.floor(index / 8);
         const col = index % 8;
 
@@ -780,11 +785,14 @@ squares.forEach((square, index) => {
             currentTurn = currentTurn === "w" ? "b" : "w";
 
             if (isCheckmate(currentTurn)) {
-                console.log("Checkmate!");
-            }
+                gameOver = true;
 
-            if (isStalemate(currentTurn)) {
-                console.log("Stalemate!");
+                const winner = currentTurn === "w" ? "Black" : "White";
+                console.log(`Checkmate! ${winner} wins.`);
+            } else if (isStalemate(currentTurn)) {
+                gameOver = true;
+
+                console.log("Draw! Stalemate.");
             }
         }
 
