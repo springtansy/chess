@@ -69,11 +69,14 @@ for (let row = 0; row < 8; row++) {
 let selectedSquare = null;
 let currentTurn = "w";
 let gameOver = false;
+let promotionSquare = null;
 
 const gameOverScreen = document.getElementById("game-over");
 const gameOverTitle = document.getElementById("game-over-title");
 const gameOverMessage = document.getElementById("game-over-message");
 const newGameButton = document.getElementById("new-game");
+const promotionScreen = document.getElementById("promotion");
+const promotionButtons = promotionScreen.querySelectorAll("button");
 const squares = document.querySelectorAll(".square");
 
 function promotePawn(row, col) {
@@ -83,9 +86,30 @@ function promotePawn(row, col) {
         return;
     }
 
-    const color = pawn[0];
+    promotionSquare = [row, col];
 
-    // choice UI coming soon
+    promotionScreen.classList.remove("hidden");
+
+    promotionButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            const choice = button.dataset.piece;
+
+            const [row, col] = promotionSquare;
+
+            const color = currentPosition[row][col][0];
+
+            currentPosition[row][col] = color + choice;
+
+            const square = squares[row * 8 + col];
+            const image = square.querySelector("img");
+
+            image.src = pieces[currentPosition[row][col]];
+            image.alt = currentPosition[row][col];
+
+            promotionSquare = null;
+            promotionScreen.classList.add("hidden");
+        });
+    });
 }
 
 function showGameOver(title, message) {
