@@ -79,14 +79,13 @@ const squares = document.querySelectorAll(".square");
 function promotePawn(row, col) {
     const pawn = currentPosition[row][col];
 
-    if (pawn !== "wP" && pawn !== "bP") {
+    if (pawn[1] !== "P") {
         return;
     }
 
-    // Queen promotion only, fix later
-    const promotedPiece = pawn[0] === "w" ? "wQ" : "bQ";
+    const color = pawn[0];
 
-    currentPosition[row][col] = promotedPiece;
+    // choice UI coming soon
 }
 
 function showGameOver(title, message) {
