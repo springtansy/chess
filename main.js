@@ -858,4 +858,7 @@ squares.forEach((square, index) => {
     });
 });
 
-newGameButton.addEventListener("click", resetGame);
+newGameButton.addEventListener("click", () => {
+    console.log("New Game clicked");
+    resetGame();
+});
