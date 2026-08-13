@@ -69,6 +69,7 @@ for (let row = 0; row < 8; row++) {
 let selectedSquare = null;
 let currentTurn = "w";
 let gameOver = false;
+let waitingForPromotion = false;
 let promotionSquare = null;
 
 const gameOverScreen = document.getElementById("game-over");
@@ -108,6 +109,24 @@ function promotePawn(row, col) {
 
             promotionSquare = null;
             promotionScreen.classList.add("hidden");
+
+            waitingForPromotion = false;
+
+            currentTurn = currentTurn === "w" ? "b" : "w";
+
+            if (isCheckmate(currentTurn)) {
+                const winner = currentTurn === "w" ? "Black" : "White";
+
+                showGameOver(
+                    "Checkmate!",
+                    `${winner} wins.`
+                );
+            } else if (isStalemate(currentTurn)) {
+                showGameOver(
+                    "Draw",
+                    "Stalemate."
+                );
+            }
         });
     });
 }
@@ -808,6 +827,7 @@ squares.forEach((square, index) => {
                 movingPiece[1] === "P" &&
                 (row === 0 || row === 7)
             ) {
+                waitingForPromotion = true;
                 promotePawn(row, col);
             }
 
@@ -858,20 +878,22 @@ squares.forEach((square, index) => {
             piece.src = pieces[currentPosition[row][col]];
             piece.alt = currentPosition[row][col];
 
-            currentTurn = currentTurn === "w" ? "b" : "w";
+            if (!waitingForPromotion) {
+                currentTurn = currentTurn === "w" ? "b" : "w";
 
-            if (isCheckmate(currentTurn)) {
-                const winner = currentTurn === "w" ? "Black" : "White";
+                if (isCheckmate(currentTurn)) {
+                    const winner = currentTurn === "w" ? "Black" : "White";
 
-                showGameOver(
-                    "Checkmate!",
-                    `${winner} wins.`
-                );
-            } else if (isStalemate(currentTurn)) {
-                showGameOver(
-                    "Draw",
-                    "Stalemate."
-                );
+                    showGameOver(
+                        "Checkmate!",
+                        `${winner} wins.`
+                    );
+                } else if (isStalemate(currentTurn)) {
+                    showGameOver(
+                        "Draw",
+                        "Stalemate."
+                    );
+                }
             }
         }
 
