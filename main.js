@@ -669,6 +669,47 @@ function showMoveHighlights(moves) {
     }
 }
 
+function resetGame() {
+    currentPosition = startingPosition.map(row => [...row]);
+
+    currentTurn = "w";
+    lastMove = null;
+
+    castlingRights = {
+        wK: true,
+        wQ: true,
+        bK: true,
+        bQ: true
+    };
+
+    selectedSquare = null;
+    gameOver = false;
+
+    clearMoveHighlights();
+
+    squares.forEach((square, index) => {
+        const row = Math.floor(index / 8);
+        const col = index % 8;
+
+        square.innerHTML = "";
+
+        const piece = currentPosition[row][col];
+
+        if (piece) {
+            const image = document.createElement("img");
+
+            image.src = pieces[piece];
+            image.alt = piece;
+
+            square.appendChild(image);
+        }
+
+        square.classList.remove("selected");
+    });
+
+    gameOverScreen.classList.add("hidden");
+}
+
 squares.forEach((square, index) => {
     square.addEventListener("click", () => {
 
@@ -816,3 +857,5 @@ squares.forEach((square, index) => {
         selectedSquare = null;    
     });
 });
+
+newGameButton.addEventListener("click", resetGame);
