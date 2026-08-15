@@ -33,10 +33,11 @@ body {
     font-size: 24px;
     border: none;
     border-radius: 12px;
-    background: #777;
-    color: #eee;
+    background: #bbb;
+    color: #555;
+    transition: background 0.15s;
 }
 
 .menu button:hover {
-    background: #888;
+    background: #ccc;
 }
