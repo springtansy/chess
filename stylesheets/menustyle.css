@@ -28,7 +28,9 @@ body {
     margin: 0;
 }
 
-.menu button {
+.menu a {
+    text-decoration: none;
+    display: inline-block;
     padding: 12px 28px;
     font-size: 24px;
     border: none;
@@ -38,6 +40,6 @@ body {
     transition: background 0.15s;
 }
 
-.menu button:hover {
+.menu a:hover {
     background: #ccc;
 }
