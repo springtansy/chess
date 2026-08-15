@@ -30,5 +30,7 @@ body {
 
 .menu button {
     padding: 12px 28px;
-    font-size: 40px;
+    font-size: 24px;
+    border: none;
+    border-radius: 12px;
 }
