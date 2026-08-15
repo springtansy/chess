@@ -30,6 +30,8 @@ const startingPosition = [
 let currentPosition = startingPosition.map(row => [...row]);
 
 let lastMove = null;
+let halfmoveClock = 0;
+let positionHistory = [];
 
 let castlingRights = {
     wK: true,
@@ -80,6 +82,14 @@ const promotionScreen = document.getElementById("promotion");
 const promotionButtons = promotionScreen.querySelectorAll("button");
 const squares = document.querySelectorAll(".square");
 
+function getPositionKey() {
+    return currentPosition
+        .map(row => row.join(","))
+        .join("/");
+}
+
+positionHistory.push(getPositionKey());
+
 function promotePawn(row, col) {
     const pawn = currentPosition[row][col];
 
@@ -112,6 +122,7 @@ function promotePawn(row, col) {
 
             waitingForPromotion = false;
 
+            positionHistory.push(getPositionKey());
             currentTurn = currentTurn === "w" ? "b" : "w";
 
             if (isCheckmate(currentTurn)) {
@@ -121,10 +132,10 @@ function promotePawn(row, col) {
                     "Checkmate!",
                     `${winner} wins.`
                 );
-            } else if (isStalemate(currentTurn)) {
+            } else if (isDraw()) {
                 showGameOver(
                     "Draw",
-                    "Stalemate."
+                    "The game is drawn."
                 );
             }
         });
@@ -742,6 +753,29 @@ function isInsufficientMaterial() {
     return false;
 }
 
+function isThreefoldRepetition() {
+    const currentKey = getPositionKey();
+
+    let count = 0;
+
+    for (const key of positionHistory) {
+        if (key === currentKey) {
+            count++;
+        }
+    }
+
+    return count >= 3;
+}
+
+function isDraw() {
+    return (
+        isStalemate(currentTurn) ||
+        isInsufficientMaterial() ||
+        halfmoveClock >= 100 ||
+        isThreeFoldRepetition()
+    );
+}
+
 function clearMoveHighlights() {
     squares.forEach(square => {
         square.classList.remove("move-option");
@@ -772,6 +806,7 @@ function resetGame() {
 
     selectedSquare = null;
     gameOver = false;
+    halfmoveClock = 0;
 
     clearMoveHighlights();
 
@@ -836,6 +871,9 @@ squares.forEach((square, index) => {
 
             const movingPiece = currentPosition[selectedRow][selectedCol];
 
+            const isPawnMove = movingPiece[1] === "P";
+            const isCapture = currentPosition[row][col] !== null;
+
             const isCastling =
                 movingPiece[1] === "K" &&
                 Math.abs(col - selectedCol) === 2;
@@ -855,6 +893,12 @@ squares.forEach((square, index) => {
             currentPosition[row][col] = movingPiece;
 
             currentPosition[selectedRow][selectedCol] = null;
+
+            if (isPawnMove || isCapture) {
+                halfmoveClock = 0;
+            } else {
+                halfmoveClock++;
+            }
 
             if (isEnPassant) {
                 currentPosition[selectedRow][col] = null;
@@ -925,6 +969,7 @@ squares.forEach((square, index) => {
             piece.alt = currentPosition[row][col];
 
             if (!waitingForPromotion) {
+                positionHistory.push(getPositionKey());
                 currentTurn = currentTurn === "w" ? "b" : "w";
 
                 if (isCheckmate(currentTurn)) {
@@ -934,15 +979,10 @@ squares.forEach((square, index) => {
                         "Checkmate!",
                         `${winner} wins.`
                     );
-                } else if (isStalemate(currentTurn)) {
+                } else if (isDraw()) {
                     showGameOver(
                         "Draw",
-                        "Stalemate."
-                    );
-                } else if (isInsufficientMaterial()) {
-                    showGameOver(
-                        "Draw",
-                        "Insufficient material."
+                        "The game is drawn."
                     );
                 }
             }
