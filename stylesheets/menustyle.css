@@ -26,6 +26,7 @@ body {
 .menu h1 {
     font-size: 64px;
     margin: 0;
+    font-weight: 550;
 }
 
 .menu a {
