@@ -696,6 +696,33 @@ function isStalemate(color) {
     return !isInCheck(color) && !hasLegalMoves(color);
 }
 
+function isInsufficientMaterial() {
+    const piecesOnBoard = [];
+
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            const piece = currentPosition[row][col];
+
+            if (piece) {
+                piecesOnBoard.push(piece);
+            }
+        }
+    }
+
+    // King vs King
+    if (piecesOnBoard.length === 2) {
+        return true;
+    }
+
+    // King + Bishop/Knight vs King
+    if (piecesOnBoard.length === 3) {
+        return piecesOnBoard.some(piece => piece[1] === "B") ||
+               piecesOnBoard.some(piece => piece[1] === "N");
+    }
+
+    return false;
+}
+
 function clearMoveHighlights() {
     squares.forEach(square => {
         square.classList.remove("move-option");
@@ -892,6 +919,11 @@ squares.forEach((square, index) => {
                     showGameOver(
                         "Draw",
                         "Stalemate."
+                    );
+                } else if (isInsufficientMaterial()) {
+                    showGameOver(
+                        "Draw",
+                        "Insufficient material."
                     );
                 }
             }
