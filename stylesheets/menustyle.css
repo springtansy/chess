@@ -27,3 +27,7 @@ body {
     font-size: 64px;
     margin: 0;
 }
+
+.menu button {
+    padding: 12px 28px;
+}
