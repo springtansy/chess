@@ -704,7 +704,11 @@ function isInsufficientMaterial() {
             const piece = currentPosition[row][col];
 
             if (piece) {
-                piecesOnBoard.push(piece);
+                piecesOnBoard.push({
+                    piece,
+                    row,
+                    col
+                });
             }
         }
     }
@@ -716,8 +720,23 @@ function isInsufficientMaterial() {
 
     // King + Bishop/Knight vs King
     if (piecesOnBoard.length === 3) {
-        return piecesOnBoard.some(piece => piece[1] === "B") ||
-               piecesOnBoard.some(piece => piece[1] === "N");
+        return piecesOnBoard.some(({ piece }) =>
+            piece[1] === "B" || piece[1] === "N"
+        );
+    }
+
+    const nonKings = piecesOnBoard.filter(
+        ({ piece }) => piece[1] !== "K"
+    );
+
+    if (nonKings.every(({ piece }) => piece[1] === "B")) {
+        const bishopColors = nonKings.map(
+            ({ row, col }) => (row + col) % 2
+        );
+
+        return bishopColors.every(
+            color => color === bishopColors[0]
+        );
     }
 
     return false;
