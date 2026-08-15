@@ -33,5 +33,10 @@ body {
     font-size: 24px;
     border: none;
     border-radius: 12px;
-    background: #555;
+    background: #777;
+    color: #eee;
+}
+
+.menu button:hover {
+    background: #888;
 }
