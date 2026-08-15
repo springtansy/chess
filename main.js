@@ -772,7 +772,7 @@ function isDraw() {
         isStalemate(currentTurn) ||
         isInsufficientMaterial() ||
         halfmoveClock >= 100 ||
-        isThreeFoldRepetition()
+        isThreefoldRepetition()
     );
 }
 
