@@ -10,7 +10,7 @@ body {
 }
 
 body {
-    background: #555;
+    background: #222;
     color: #eee;
 }
 
@@ -33,4 +33,5 @@ body {
     font-size: 24px;
     border: none;
     border-radius: 12px;
+    background: #555;
 }
