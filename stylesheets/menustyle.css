@@ -22,3 +22,8 @@ body {
     justify-content: center;
     gap: 20px;
 }
+
+.menu h1 {
+    font-size: 64px;
+    margin: 0;
+}
