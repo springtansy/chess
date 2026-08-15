@@ -83,9 +83,31 @@ const promotionButtons = promotionScreen.querySelectorAll("button");
 const squares = document.querySelectorAll(".square");
 
 function getPositionKey() {
-    return currentPosition
+    const boardKey = currentPosition
         .map(row => row.join(","))
         .join("/");
+
+    const turnKey = currentTurn;
+
+    const castlingKey =
+        (castlingRights.wK ? "K" : "") +
+        (castlingRights.wQ ? "Q" : "") +
+        (castlingRights.bK ? "k" : "") +
+        (castlingRights.bQ ? "q" : "");
+
+    let enPassantKey = "-";
+
+    if (lastMove && lastMove.piece[1] === "P") {
+        if (Math.abs(lastMove.toRow - lastMove.fromRow) === 2) {
+            const enPassantRow =
+                (lastMove.fromRow + lastMove.toRow) / 2;
+
+            enPassantKey =
+                `${enPassantRow},${lastMove.toCol}`;
+        }
+    }
+
+    return `${boardKey} ${turnKey} ${castlingKey || "-"} ${enPassantKey}`;
 }
 
 positionHistory.push(getPositionKey());
@@ -122,8 +144,8 @@ function promotePawn(row, col) {
 
             waitingForPromotion = false;
 
-            positionHistory.push(getPositionKey());
             currentTurn = currentTurn === "w" ? "b" : "w";
+            positionHistory.push(getPositionKey());
 
             if (isCheckmate(currentTurn)) {
                 const winner = currentTurn === "w" ? "Black" : "White";
@@ -807,6 +829,7 @@ function resetGame() {
     selectedSquare = null;
     gameOver = false;
     halfmoveClock = 0;
+    positionHistory = [];
 
     clearMoveHighlights();
 
@@ -830,6 +853,7 @@ function resetGame() {
         square.classList.remove("selected");
     });
 
+    positionHistory.push(getPositionKey());
     gameOverScreen.classList.add("hidden");
 }
 
@@ -969,8 +993,8 @@ squares.forEach((square, index) => {
             piece.alt = currentPosition[row][col];
 
             if (!waitingForPromotion) {
-                positionHistory.push(getPositionKey());
                 currentTurn = currentTurn === "w" ? "b" : "w";
+                positionHistory.push(getPositionKey());
 
                 if (isCheckmate(currentTurn)) {
                     const winner = currentTurn === "w" ? "Black" : "White";
