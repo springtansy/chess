@@ -775,6 +775,39 @@ function isInsufficientMaterial() {
     return false;
 }
 
+function getAllLegalMoves(color) {
+    const moves = [];
+    
+    for (let pieceRow = 0; pieceRow < 8; pieceRow++) {
+        for (let pieceCol = 0; pieceCol < 8; pieceCol++) {
+            const piece = currentPosition[pieceRow][pieceCol];
+
+            if (!piece || piece[0] !== color) {
+                continue;
+            }
+
+            const pieceMoves = getLegalMoves(pieceRow, pieceCol);
+
+            for (const move of pieceMoves) {
+                moves.push([
+                    [pieceRow,pieceCol],
+                    move
+                ]);
+            }
+        }
+    }
+
+    return moves;
+}
+
+function getRandomMove(color) {
+    const moves = getAllLegalMoves(color);
+
+    const randomMove = moves[Math.floor(Math.random() * moves.length)];
+
+    return randomMove;
+}
+
 function isThreefoldRepetition() {
     const currentKey = getPositionKey();
 
@@ -855,6 +888,63 @@ function resetGame() {
 
     positionHistory.push(getPositionKey());
     gameOverScreen.classList.add("hidden");
+}
+
+function movePiece(fromRow, fromCol, toRow, toCol) {
+    const movingPiece = currentPosition[fromRow][fromCol];
+
+    const isPawnMove = movingPiece[1] === "P";
+    const isCapture = currentPosition[toRow][toCol] !== null;
+
+    const isCastling =
+        movingPiece[1] === "K" &&
+        Math.abs(toCol - fromCol) === 2;
+
+    const isEnPassant =
+        movingPiece[1] === "P" &&
+        toCol !== fromCol &&
+        currentPosition[toRow][toCol] === null;
+
+    updateCastlingRights(
+        fromRow,
+        fromCol,
+        toRow,
+        toCol
+    );
+            
+    currentPosition[toRow][toCol] = movingPiece;
+
+    currentPosition[fromRow][fromCol] = null;
+
+    if (isPawnMove || isCapture) {
+        halfmoveClock = 0;
+    } else {
+        halfmoveClock++;
+    }
+    
+    if (isEnPassant) {
+        currentPosition[fromRow][toCol] = null;
+    }
+    
+    if (
+        movingPiece[1] === "P" &&
+        (toRow === 0 || toRow === 7)
+    ) {
+        //waitingForPromotion = true;
+        //promotePawn(toRow, toCol);
+    }
+    
+    if (isCastling) {
+        if (toCol === 6) {
+            // Kingside
+            currentPosition[toRow][5] = currentPosition[toRow][7];
+            currentPosition[toRow][7] = null;
+        } else if (toCol === 2) {
+            // Queenside
+            currentPosition[toRow][3] = currentPosition[toRow][0];
+            currentPosition[toRow][0] = null;
+        }
+    }
 }
 
 squares.forEach((square, index) => {
