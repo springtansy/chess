@@ -912,6 +912,34 @@ function renderBoard() {
     });
 }
 
+function completeMove(fromRow, fromCol, toRow, toCol, movingPiece) {
+    lastMove = {
+        fromRow,
+        fromCol,
+        toRow,
+        toCol,
+        piece: movingPiece
+    };
+
+    currentTurn = currentTurn === "w" ? "b" : "w";
+
+    positionHistory.push(getPositionKey());
+
+    if (isCheckmate(currentTurn)) {
+        const winner = currentTurn === "w" ? "Black" : "White";
+
+        showGameOver(
+            "Checkmate!",
+            `${winner} wins.`
+        );
+    } else if (isDraw()) {
+        showGameOver(
+            "Draw",
+            "The game is drawn."
+        );
+    }
+}
+
 function movePiece(fromRow, fromCol, toRow, toCol) {
     const movingPiece = currentPosition[fromRow][fromCol];
 
@@ -967,6 +995,21 @@ function movePiece(fromRow, fromCol, toRow, toCol) {
             currentPosition[toRow][0] = null;
         }
     }
+}
+
+function makeBotMove() {
+    const move = getRandomMove(currentTurn);
+
+    const [from, to] = move;
+    
+    const [fromRow, fromCol] = from;
+    const [toRow, toCol] = to;
+
+    const movingPiece = currentPosition[fromRow][fromCol];
+
+    movePiece(fromRow,fromCol,toRow,toCol)
+    renderBoard()
+    completeMove(fromRow,fromCol,toRow,toCol,movingPiece)
 }
 
 squares.forEach((square, index) => {
