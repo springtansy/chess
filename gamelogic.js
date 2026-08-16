@@ -890,6 +890,28 @@ function resetGame() {
     gameOverScreen.classList.add("hidden");
 }
 
+function renderBoard() {
+    squares.forEach((square, index) => {
+        const row = Math.floor(index / 8);
+        const col = index % 8;
+
+        square.innerHTML = "";
+
+        const piece = currentPosition[row][col];
+
+        if (piece) {
+            const image = document.createElement("img");
+
+            image.src = pieces[piece];
+            image.alt = piece;
+
+            square.appendChild(image);
+        }
+
+        square.classList.remove("selected");
+    });
+}
+
 function movePiece(fromRow, fromCol, toRow, toCol) {
     const movingPiece = currentPosition[fromRow][fromCol];
 
