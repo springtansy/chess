@@ -32,6 +32,10 @@ let currentPosition = startingPosition.map(row => [...row]);
 let lastMove = null;
 let halfmoveClock = 0;
 let positionHistory = [];
+const gameMode = {
+    w: "player",
+    b: "bot/randomMove"
+};
 
 let castlingRights = {
     wK: true,
@@ -938,6 +942,15 @@ function completeMove(fromRow, fromCol, toRow, toCol, movingPiece) {
             "The game is drawn."
         );
     }
+
+    if (
+        !gameOver &&
+        gameMode[currentTurn].slice(0, 4) === "bot/"
+    ) {
+        makeBotMove(
+            gameMode[currentTurn].slice(4)
+        );
+    }
 }
 
 function movePiece(fromRow, fromCol, toRow, toCol) {
@@ -997,7 +1010,7 @@ function movePiece(fromRow, fromCol, toRow, toCol) {
     }
 }
 
-function makeBotMove() {
+function makeBotMove(botName) {
     const move = getRandomMove(currentTurn);
 
     const [from, to] = move;
