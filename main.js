@@ -33,8 +33,8 @@ let lastMove = null;
 let halfmoveClock = 0;
 let positionHistory = [];
 const gameMode = {
-    w: "player",
-    b: "bot/randomMove"
+    w: "bot/greedy",
+    b: "player"
 };
 
 let castlingRights = {
