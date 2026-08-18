@@ -116,14 +116,20 @@ function getPositionKey() {
 
 positionHistory.push(getPositionKey());
 
-function promotePawn(row, col) {
+function promotePawn(row, col, fromRow, fromCol, movingPiece) {
     const pawn = currentPosition[row][col];
 
     if (pawn[1] !== "P") {
         return;
     }
 
-    promotionSquare = [row, col];
+    promotionSquare = {
+        row,
+        col,
+        fromRow,
+        fromCol,
+        movingPiece
+    };
 
     promotionScreen.classList.remove("hidden");
 
@@ -131,39 +137,32 @@ function promotePawn(row, col) {
         button.addEventListener("click", () => {
             const choice = button.dataset.piece;
 
-            const [row, col] = promotionSquare;
+            const {
+                row,
+                col,
+                fromRow,
+                fromCol,
+                movingPiece
+            } = promotionSquare;
 
             const color = currentPosition[row][col][0];
 
             currentPosition[row][col] = color + choice;
 
-            const square = squares[row * 8 + col];
-            const image = square.querySelector("img");
-
-            image.src = pieces[currentPosition[row][col]];
-            image.alt = currentPosition[row][col];
+            renderBoard()
 
             promotionSquare = null;
             promotionScreen.classList.add("hidden");
 
             waitingForPromotion = false;
 
-            currentTurn = currentTurn === "w" ? "b" : "w";
-            positionHistory.push(getPositionKey());
-
-            if (isCheckmate(currentTurn)) {
-                const winner = currentTurn === "w" ? "Black" : "White";
-
-                showGameOver(
-                    "Checkmate!",
-                    `${winner} wins.`
-                );
-            } else if (isDraw()) {
-                showGameOver(
-                    "Draw",
-                    "The game is drawn."
-                );
-            }
+            completeMove(
+                fromRow,
+                fromCol,
+                row,
+                col,
+                movingPiece
+            );
         });
     });
 }
@@ -916,7 +915,7 @@ function renderBoard() {
     });
 }
 
-function completeMove(fromRow, fromCol, toRow, toCol, movingPiece, promotion=false) {
+function completeMove(fromRow, fromCol, toRow, toCol, movingPiece) {
     lastMove = {
         fromRow,
         fromCol,
@@ -924,10 +923,6 @@ function completeMove(fromRow, fromCol, toRow, toCol, movingPiece, promotion=fal
         toCol,
         piece: movingPiece
     };
-
-    if (promotion) {
-        return;
-    }
 
     currentTurn = currentTurn === "w" ? "b" : "w";
 
@@ -1082,7 +1077,13 @@ squares.forEach((square, index) => {
 
             if (moveResult.promotion) {
                 waitingForPromotion = true;
-                promotePawn(row, col);
+                promotePawn(
+                    row,
+                    col,
+                    selectedRow,
+                    selectedCol,
+                    movingPiece
+                );
             }
 
             if (!moveResult.promotion) {
