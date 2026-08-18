@@ -969,7 +969,7 @@ function completeMove(fromRow, fromCol, toRow, toCol, movingPiece) {
     }
 }
 
-function movePiece(fromRow, fromCol, toRow, toCol,promotion=null) {
+function movePiece(fromRow, fromCol, toRow, toCol, promotionPiece=null) {
     const movingPiece = currentPosition[fromRow][fromCol];
 
     const isPawnMove = movingPiece[1] === "P";
@@ -993,8 +993,8 @@ function movePiece(fromRow, fromCol, toRow, toCol,promotion=null) {
             
     currentPosition[toRow][toCol] = movingPiece;
 
-    if promotion {
-        currentPosition[toRow][toCol] = movingPiece[0]+promotion
+    if promotionPiece {
+        currentPosition[toRow][toCol] = movingPiece[0]+promotionPiece;
     }
 
     currentPosition[fromRow][fromCol] = null;
