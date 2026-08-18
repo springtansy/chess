@@ -916,7 +916,7 @@ function renderBoard() {
     });
 }
 
-function completeMove(fromRow, fromCol, toRow, toCol, movingPiece) {
+function completeMove(fromRow, fromCol, toRow, toCol, movingPiece, promotion=false) {
     lastMove = {
         fromRow,
         fromCol,
@@ -924,6 +924,10 @@ function completeMove(fromRow, fromCol, toRow, toCol, movingPiece) {
         toCol,
         piece: movingPiece
     };
+
+    if (promotion) {
+        return;
+    }
 
     currentTurn = currentTurn === "w" ? "b" : "w";
 
@@ -1100,23 +1104,14 @@ squares.forEach((square, index) => {
             piece.src = pieces[currentPosition[row][col]];
             piece.alt = currentPosition[row][col];
 
-            if (!waitingForPromotion) {
-                currentTurn = currentTurn === "w" ? "b" : "w";
-                positionHistory.push(getPositionKey());
-
-                if (isCheckmate(currentTurn)) {
-                    const winner = currentTurn === "w" ? "Black" : "White";
-
-                    showGameOver(
-                        "Checkmate!",
-                        `${winner} wins.`
-                    );
-                } else if (isDraw()) {
-                    showGameOver(
-                        "Draw",
-                        "The game is drawn."
-                    );
-                }
+            if (!moveResult.promotion) {
+                completeMove(
+                selectedRow,
+                selectedCol,
+                row,
+                col,
+                movingPiece
+                );
             }
         }
 
