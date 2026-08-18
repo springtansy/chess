@@ -1,19 +1,50 @@
-function makeBotMove(botName) {
-    const bots = {
-        random: randomBotMove,
-    };
-    const move = getRandomMove(currentTurn);
+const bots = {
+    random: randomBotMove,
+    greedy: greedyBotMove,
+};
 
-    const {from, to, promotion} = move;
-    
+const pieceValues = {
+    P: 1,
+    N: 3,
+    B: 3,
+    R: 5,
+    Q: 9,
+    K: 100
+};
+
+function makeBotMove(botName) {
+    const bot = bots[botName] || randomBotMove;
+
+    const move = bot(currentTurn);
+
+    if (!move) {
+        return;
+    }
+
+    const { from, to, promotion } = move;
+
     const [fromRow, fromCol] = from;
     const [toRow, toCol] = to;
 
     const movingPiece = currentPosition[fromRow][fromCol];
 
-    movePiece(fromRow,fromCol,toRow,toCol,promotion)
-    renderBoard()
-    completeMove(fromRow,fromCol,toRow,toCol,movingPiece)
+    movePiece(
+        fromRow,
+        fromCol,
+        toRow,
+        toCol,
+        promotion
+    );
+
+    renderBoard();
+
+    completeMove(
+        fromRow,
+        fromCol,
+        toRow,
+        toCol,
+        movingPiece
+    );
 }
 
 function getAllLegalMoves(color) {
@@ -69,4 +100,35 @@ function randomBotMove(color) {
     const move = getRandomMove(moves);
 
     return move;
+}
+
+function greedyBotMove(color) {
+    const moves = getAllLegalMoves(color);
+
+    let bestValue = -Infinity;
+    let bestMoves = [];
+
+    for (const move of moves) {
+        const [toRow, toCol] = move.to;
+        const capturedPiece = currentPosition[toRow][toCol];
+
+        let value = 0;
+
+        if (capturedPiece) {
+            value += pieceValues[capturedPiece[1]];
+        }
+
+        if (move.promotion) {
+            value += pieceValues[move.promotion];
+        }
+
+        if (value > bestValue) {
+            bestValue = value;
+            bestMoves = [move];
+        } else if (value === bestValue) {
+            bestMoves.push(move);
+        }
+    }
+
+    return getRandomMove(bestMoves);
 }
