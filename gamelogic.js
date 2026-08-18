@@ -1008,6 +1008,10 @@ function movePiece(fromRow, fromCol, toRow, toCol) {
             currentPosition[toRow][0] = null;
         }
     }
+
+    return {
+        promotion: movingPiece[1] === "P" && (toRow === 0 || toRow === 7)
+    };
 }
 
 function makeBotMove(botName) {
@@ -1063,7 +1067,17 @@ squares.forEach((square, index) => {
 
             const movingPiece = currentPosition[selectedRow][selectedCol];
 
-            movePiece(selectedRow,selectedCol,row,col)
+            const moveResult = movePiece(
+                selectedRow,
+                selectedCol,
+                row,
+                col
+            );
+
+            if (moveResult.promotion) {
+                waitingForPromotion = true;
+                promotePawn(row, col);
+            }
 
             const piece = selectedSquare.querySelector("img");
 
