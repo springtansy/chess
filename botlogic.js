@@ -1,4 +1,7 @@
 function makeBotMove(botName) {
+    const bots = {
+        random: randomBotMove,
+    };
     const move = getRandomMove(currentTurn);
 
     const {from, to, promotion} = move;
@@ -55,10 +58,15 @@ function getAllLegalMoves(color) {
     return moves;
 }
 
-function getRandomMove(color) {
-    const moves = getAllLegalMoves(color);
-
+function getRandomMove(moves) {
     const randomMove = moves[Math.floor(Math.random() * moves.length)];
 
     return randomMove;
+}
+
+function randomBotMove(color) {
+    const moves = getAllLegalMoves(color);
+    const move = getRandomMove(moves);
+
+    return move;
 }
