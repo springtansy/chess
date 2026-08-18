@@ -115,12 +115,16 @@ function getPositionKey() {
 }
 
 positionHistory.push(getPositionKey());
-if (
-    gameMode[currentTurn].slice(0, 4) === "bot/"
-) {
-    makeBotMove(
-        gameMode[currentTurn].slice(4)
-    );
+
+function startBotIfNeeded() {
+    if (
+        !gameOver &&
+        gameMode[currentTurn].slice(0, 4) === "bot/"
+    ) {
+        makeBotMove(
+            gameMode[currentTurn].slice(4)
+        );
+    }
 }
 
 function promotePawn(row, col, fromRow, fromCol, movingPiece) {
