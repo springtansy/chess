@@ -1078,31 +1078,12 @@ squares.forEach((square, index) => {
                 col
             );
 
+            renderBoard()
+
             if (moveResult.promotion) {
                 waitingForPromotion = true;
                 promotePawn(row, col);
             }
-
-            const piece = selectedSquare.querySelector("img");
-
-            const capturedPiece = square.querySelector("img");
-
-            lastMove = {
-                fromRow: selectedRow,
-                fromCol: selectedCol,
-                toRow: row,
-                toCol: col,
-                piece: movingPiece
-            };
-
-            if (capturedPiece) {
-                capturedPiece.remove();
-            }
-
-            square.appendChild(piece);
-
-            piece.src = pieces[currentPosition[row][col]];
-            piece.alt = currentPosition[row][col];
 
             if (!moveResult.promotion) {
                 completeMove(
