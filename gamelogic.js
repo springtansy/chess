@@ -993,7 +993,7 @@ function movePiece(fromRow, fromCol, toRow, toCol, promotionPiece=null) {
             
     currentPosition[toRow][toCol] = movingPiece;
 
-    if promotionPiece {
+    if (promotionPiece) {
         currentPosition[toRow][toCol] = movingPiece[0]+promotionPiece;
     }
 
