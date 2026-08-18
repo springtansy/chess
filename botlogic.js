@@ -132,3 +132,6 @@ function greedyBotMove(color) {
 
     return getRandomMove(bestMoves);
 }
+
+
+startBotIfNeeded();
