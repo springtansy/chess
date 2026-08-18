@@ -780,7 +780,7 @@ function isInsufficientMaterial() {
 
 function getAllLegalMoves(color) {
     const moves = [];
-    
+
     for (let pieceRow = 0; pieceRow < 8; pieceRow++) {
         for (let pieceCol = 0; pieceCol < 8; pieceCol++) {
             const piece = currentPosition[pieceRow][pieceCol];
@@ -792,10 +792,27 @@ function getAllLegalMoves(color) {
             const pieceMoves = getLegalMoves(pieceRow, pieceCol);
 
             for (const move of pieceMoves) {
-                moves.push([
-                    [pieceRow,pieceCol],
-                    move
-                ]);
+                const [toRow, toCol] = move;
+
+                const isPromotion =
+                    piece[1] === "P" &&
+                    (toRow === 0 || toRow === 7);
+
+                if (isPromotion) {
+                    for (const promotion of ["Q", "R", "B", "N"]) {
+                        moves.push({
+                            from: [pieceRow, pieceCol],
+                            to: [toRow, toCol],
+                            promotion: promotion
+                        });
+                    }
+                } else {
+                    moves.push({
+                        from: [pieceRow, pieceCol],
+                        to: [toRow, toCol],
+                        promotion: null
+                    });
+                }
             }
         }
     }
@@ -952,7 +969,7 @@ function completeMove(fromRow, fromCol, toRow, toCol, movingPiece) {
     }
 }
 
-function movePiece(fromRow, fromCol, toRow, toCol) {
+function movePiece(fromRow, fromCol, toRow, toCol,promotion=null) {
     const movingPiece = currentPosition[fromRow][fromCol];
 
     const isPawnMove = movingPiece[1] === "P";
@@ -976,6 +993,10 @@ function movePiece(fromRow, fromCol, toRow, toCol) {
             
     currentPosition[toRow][toCol] = movingPiece;
 
+    if promotion {
+        currentPosition[toRow][toCol] = movingPiece[0]+promotion
+    }
+
     currentPosition[fromRow][fromCol] = null;
 
     if (isPawnMove || isCapture) {
@@ -986,14 +1007,6 @@ function movePiece(fromRow, fromCol, toRow, toCol) {
     
     if (isEnPassant) {
         currentPosition[fromRow][toCol] = null;
-    }
-    
-    if (
-        movingPiece[1] === "P" &&
-        (toRow === 0 || toRow === 7)
-    ) {
-        //waitingForPromotion = true;
-        //promotePawn(toRow, toCol);
     }
     
     if (isCastling) {
@@ -1016,14 +1029,14 @@ function movePiece(fromRow, fromCol, toRow, toCol) {
 function makeBotMove(botName) {
     const move = getRandomMove(currentTurn);
 
-    const [from, to] = move;
+    const {from, to, promotion} = move;
     
     const [fromRow, fromCol] = from;
     const [toRow, toCol] = to;
 
     const movingPiece = currentPosition[fromRow][fromCol];
 
-    movePiece(fromRow,fromCol,toRow,toCol)
+    movePiece(fromRow,fromCol,toRow,toCol,promotion)
     renderBoard()
     completeMove(fromRow,fromCol,toRow,toCol,movingPiece)
 }
