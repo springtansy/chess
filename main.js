@@ -115,6 +115,13 @@ function getPositionKey() {
 }
 
 positionHistory.push(getPositionKey());
+if (
+    gameMode[currentTurn].slice(0, 4) === "bot/"
+) {
+    makeBotMove(
+        gameMode[currentTurn].slice(4)
+    );
+}
 
 function promotePawn(row, col, fromRow, fromCol, movingPiece) {
     const pawn = currentPosition[row][col];
@@ -858,6 +865,15 @@ function resetGame() {
 
     positionHistory.push(getPositionKey());
     gameOverScreen.classList.add("hidden");
+
+    if (
+        !gameOver &&
+        gameMode[currentTurn].slice(0, 4) === "bot/"
+    ) {
+        makeBotMove(
+            gameMode[currentTurn].slice(4)
+        );
+    }
 }
 
 function renderBoard() {
