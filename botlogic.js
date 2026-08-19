@@ -1,16 +1,105 @@
 const bots = {
     random: randomBotMove,
     greedy: greedyBotMove,
+    piecetable: piecetableBotMove,
 };
 
 const pieceValues = {
-    P: 1,
-    N: 3,
-    B: 3,
-    R: 5,
-    Q: 9,
-    K: 100
+    P: 100,
+    N: 300,
+    B: 300,
+    R: 500,
+    Q: 900,
+    K: 100000000
 };
+
+const PAWN_TABLE = [
+    0,  0,  0,  0,  0,  0,  0,  0,
+   50, 50, 50, 50, 50, 50, 50, 50,
+   10, 10, 20, 30, 30, 20, 10, 10,
+    5,  5, 10, 25, 25, 10,  5,  5,
+    0,  0,  0, 20, 20,  0,  0,  0,
+    5, -5,-10,  0,  0,-10, -5,  5,
+    5, 10, 10,-20,-20, 10, 10,  5,
+    0,  0,  0,  0,  0,  0,  0,  0
+];
+
+const KNIGHT_TABLE = [
+  -50,-40,-30,-30,-30,-30,-40,-50,
+  -40,-20,  0,  0,  0,  0,-20,-40,
+  -30,  0, 10, 15, 15, 10,  0,-30,
+  -30,  5, 15, 20, 20, 15,  5,-30,
+  -30,  0, 15, 20, 20, 15,  0,-30,
+  -30,  5, 10, 15, 15, 10,  5,-30,
+  -40,-20,  0,  5,  5,  0,-20,-40,
+  -50,-40,-30,-30,-30,-30,-40,-50
+];
+
+const KING_OPENING_TABLE = [
+  -30,-40,-40,-50,-50,-40,-40,-30,
+  -30,-40,-40,-50,-50,-40,-40,-30,
+  -30,-40,-40,-50,-50,-40,-40,-30,
+  -30,-40,-40,-50,-50,-40,-40,-30,
+  -20,-30,-30,-40,-40,-30,-30,-20,
+  -10,-20,-20,-20,-20,-20,-20,-10,
+   20, 20,  0,  0,  0,  0, 20, 20,
+   20, 30, 10,  0,  0, 10, 30, 20
+];
+
+const BISHOP_TABLE = [
+    [-20,-10,-10,-10,-10,-10,-10,-20],
+    [-10,  0,  0,  0,  0,  0,  0,-10],
+    [-10,  0,  5, 10, 10,  5,  0,-10],
+    [-10,  5,  5, 10, 10,  5,  5,-10],
+    [-10,  0, 10, 10, 10, 10,  0,-10],
+    [-10, 10, 10, 10, 10, 10, 10,-10],
+    [-10,  5,  0,  0,  0,  0,  5,-10],
+    [-20,-10,-10,-10,-10,-10,-10,-20]
+];
+
+const ROOK_TABLE = [
+    [ 0,  0,  0,  0,  0,  0,  0,  0],
+    [ 5, 10, 10, 10, 10, 10, 10,  5],
+    [-5,  0,  0,  0,  0,  0,  0, -5],
+    [-5,  0,  0,  0,  0,  0,  0, -5],
+    [-5,  0,  0,  0,  0,  0,  0, -5],
+    [-5,  0,  0,  0,  0,  0,  0, -5],
+    [-5,  0,  0,  0,  0,  0,  0, -5],
+    [ 0,  0,  0,  5,  5,  0,  0,  0]
+];
+
+const QUEEN_TABLE = [
+    [-20,-10,-10, -5, -5,-10,-10,-20],
+    [-10,  0,  0,  0,  0,  0,  0,-10],
+    [-10,  0,  5,  5,  5,  5,  0,-10],
+    [ -5,  0,  5,  5,  5,  5,  0, -5],
+    [  0,  0,  5,  5,  5,  5,  0, -5],
+    [-10,  5,  5,  5,  5,  5,  0,-10],
+    [-10,  0,  5,  0,  0,  0,  0,-10],
+    [-20,-10,-10, -5, -5,-10,-10,-20]
+];
+
+const pstTables = {
+    P: PAWN_TABLE,
+    N: KNIGHT_TABLE,
+    B: BISHOP_TABLE,
+    R: ROOK_TABLE,
+    Q: QUEEN_TABLE,
+    K: KING_OPENING_TABLE
+};
+
+function getPieceSquareValue(pieceStr, row, col) {
+    const color = pieceStr[0]; // 'w' or 'b'
+    const type = pieceStr[1];  // 'P', 'N', 'B', etc.
+    
+    const table = pstTables[type];
+    if (!table) return 0;
+
+    // Flip the row for Black pieces
+    const tableRow = (color === 'w') ? row : (7 - row);
+    
+    return table[tableRow][col];
+}
 
 function makeBotMove(botName) {
     const bot = bots[botName] || randomBotMove;
@@ -119,7 +208,7 @@ function greedyBotMove(color) {
         }
 
         if (move.promotion) {
-            value += pieceValues[move.promotion];
+            value = value + pieceValues[move.promotion] -1;
         }
 
         if (value > bestValue) {
@@ -133,5 +222,50 @@ function greedyBotMove(color) {
     return getRandomMove(bestMoves);
 }
 
+function piecetableBotMove(color) {
+    const moves = getAllLegalMoves(color);
+
+    let bestValue = -Infinity;
+    let bestMoves = [];
+
+    for (const move of moves) {
+        const [fromRow, fromCol] = move.from;
+        const [toRow, toCol] = move.to;
+
+        const movingPiece = currentPosition[fromRow][fromCol];
+        const movingType = movingPiece[1];
+        const capturedPiece = currentPosition[toRow][toCol];
+
+        let value = 0;
+
+        const fromPst = getPstValue(movingType, color, fromRow, fromCol);
+        let toPst = getPstValue(movingType, color, toRow, toCol);
+
+        if (move.promotion) {
+            const promoType = move.promotion.toUpperCase();
+            value += pieceValues[promoType] - pieceValues[movingType];
+            toPst = getPstValue(promoType, color, toRow, toCol);
+        }
+
+        value += (toPst - fromPst);
+
+        if (capturedPiece) {
+            const capturedType = capturedPiece[1];
+            const enemyColor = color === 'w' ? 'b' : 'w';
+            const enemyPst = getPstValue(capturedType, enemyColor, toRow, toCol);
+
+            value += pieceValues[capturedType] + enemyPst;
+        }
+
+        if (value > bestValue) {
+            bestValue = value;
+            bestMoves = [move];
+        } else if (value === bestValue) {
+            bestMoves.push(move);
+        }
+    }
+
+    return getRandomMove(bestMoves);
+}
 
 startBotIfNeeded();
