@@ -33,7 +33,7 @@ let lastMove = null;
 let halfmoveClock = 0;
 let positionHistory = [];
 const gameMode = {
-    w: "bot/greedy",
+    w: "bot/piecetable",
     b: "player"
 };
 
