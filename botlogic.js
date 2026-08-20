@@ -36,14 +36,14 @@ const KNIGHT_TABLE = [
 ];
 
 const KING_OPENING_TABLE = [
-  -30,-40,-40,-50,-50,-40,-40,-30,
-  -30,-40,-40,-50,-50,-40,-40,-30,
-  -30,-40,-40,-50,-50,-40,-40,-30,
-  -30,-40,-40,-50,-50,-40,-40,-30,
-  -20,-30,-30,-40,-40,-30,-30,-20,
-  -10,-20,-20,-20,-20,-20,-20,-10,
-   20, 20,  0,  0,  0,  0, 20, 20,
-   20, 30, 10,  0,  0, 10, 30, 20
+  [-30,-40,-40,-50,-50,-40,-40,-30],
+  [-30,-40,-40,-50,-50,-40,-40,-30],
+  [-30,-40,-40,-50,-50,-40,-40,-30],
+  [-30,-40,-40,-50,-50,-40,-40,-30],
+  [-20,-30,-30,-40,-40,-30,-30,-20],
+  [-10,-20,-20,-20,-20,-20,-20,-10],
+  [20, 20,  0,  0,  0,  0, 20, 20],
+  [20, 30, 10,  0,  0, 10, 30, 20]
 ];
 
 const BISHOP_TABLE = [
@@ -238,13 +238,13 @@ function piecetableBotMove(color) {
 
         let value = 0;
 
-        const fromPst = getPstValue(movingType, color, fromRow, fromCol);
-        let toPst = getPstValue(movingType, color, toRow, toCol);
+        const fromPst = getPieceSquareValue(movingType, color, fromRow, fromCol);
+        let toPst = getPieceSquareValue(movingType, color, toRow, toCol);
 
         if (move.promotion) {
             const promoType = move.promotion.toUpperCase();
             value += pieceValues[promoType] - pieceValues[movingType];
-            toPst = getPstValue(promoType, color, toRow, toCol);
+            toPst = getPieceSquareValue(promoType, color, toRow, toCol);
         }
 
         value += (toPst - fromPst);
@@ -252,7 +252,7 @@ function piecetableBotMove(color) {
         if (capturedPiece) {
             const capturedType = capturedPiece[1];
             const enemyColor = color === 'w' ? 'b' : 'w';
-            const enemyPst = getPstValue(capturedType, enemyColor, toRow, toCol);
+            const enemyPst = getPieceSquareValue(capturedType, enemyColor, toRow, toCol);
 
             value += pieceValues[capturedType] + enemyPst;
         }
