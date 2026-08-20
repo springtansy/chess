@@ -238,23 +238,47 @@ function piecetableBotMove(color) {
 
         let value = 0;
 
-        const fromPst = getPieceSquareValue(movingType, color, fromRow, fromCol);
-        let toPst = getPieceSquareValue(movingType, color, toRow, toCol);
+        const fromPst = getPieceSquareValue(
+            movingPiece,
+            fromRow,
+            fromCol
+        );
 
+        let toPst = getPieceSquareValue(
+            movingPiece,
+            toRow,
+            toCol
+        );
+
+        // Promotion
         if (move.promotion) {
             const promoType = move.promotion.toUpperCase();
-            value += (pieceValues[promoType] - pieceValues[movingType]);
-            toPst = getPieceSquareValue(promoType, color, toRow, toCol);
+            const promoPiece = color + promoType;
+
+            value += pieceValues[promoType] - pieceValues[movingType];
+
+            toPst = getPieceSquareValue(
+                promoPiece,
+                toRow,
+                toCol
+            );
         }
 
-        value += (toPst - fromPst);
+        // Moving piece's PST improvement
+        value += toPst - fromPst;
 
+        // Capture
         if (capturedPiece) {
             const capturedType = capturedPiece[1];
-            const enemyColor = color === 'w' ? 'b' : 'w';
-            const enemyPst = getPieceSquareValue(capturedType, enemyColor, toRow, toCol);
 
-            value += (pieceValues[capturedType] + enemyPst);
+            value += pieceValues[capturedType];
+
+            // Remove the captured piece's positional contribution
+            value -= getPieceSquareValue(
+                capturedPiece,
+                toRow,
+                toCol
+            );
         }
 
         if (value > bestValue) {
