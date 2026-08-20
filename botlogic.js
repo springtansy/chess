@@ -243,7 +243,7 @@ function piecetableBotMove(color) {
 
         if (move.promotion) {
             const promoType = move.promotion.toUpperCase();
-            value += pieceValues[promoType] - pieceValues[movingType];
+            value += (pieceValues[promoType] - pieceValues[movingType]);
             toPst = getPieceSquareValue(promoType, color, toRow, toCol);
         }
 
@@ -254,7 +254,7 @@ function piecetableBotMove(color) {
             const enemyColor = color === 'w' ? 'b' : 'w';
             const enemyPst = getPieceSquareValue(capturedType, enemyColor, toRow, toCol);
 
-            value += pieceValues[capturedType] + enemyPst;
+            value += (pieceValues[capturedType] + enemyPst);
         }
 
         if (value > bestValue) {
