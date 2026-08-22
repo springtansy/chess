@@ -2,6 +2,7 @@ const bots = {
     random: randomBotMove,
     greedy: greedyBotMove,
     piecetable: piecetableBotMove,
+    sixseven: sixsevenBotMove,
 };
 
 const pieceValues = {
@@ -290,6 +291,28 @@ function piecetableBotMove(color) {
     }
 
     return getRandomMove(bestMoves);
+}
+
+function sixsevenBotMove(color) {
+    const moves = getAllLegalMoves(color);
+
+    if (moves.length === 0) {
+        return null;
+    }
+
+    const rank7Moves = moves.filter(move => move.to[0] === 1);
+
+    if (rank7Moves.length > 0) {
+        return getRandomMove(rank7Moves);
+    }
+
+    const rank6Moves = moves.filter(move => move.to[0] === 2);
+
+    if (rank6Moves.length > 0) {
+        return getRandomMove(rank6Moves);
+    }
+
+    return getRandomMove(moves);
 }
 
 startBotIfNeeded();
