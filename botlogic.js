@@ -609,7 +609,7 @@ function minimaxBotMove(color) {
         return null;
     }
 
-    const depth = 3;
+    const depth = 4;
 
     let bestValue =
         color === "w"
