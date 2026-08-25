@@ -77,6 +77,7 @@ let currentTurn = "w";
 let gameOver = false;
 let waitingForPromotion = false;
 let promotionSquare = null;
+let pgnMoves = [];
 
 const gameOverScreen = document.getElementById("game-over");
 const gameOverTitle = document.getElementById("game-over-title");
@@ -127,6 +128,287 @@ function startBotIfNeeded() {
     }
 }
 
+function getSquareName(row, col) {
+    const files = "abcdefgh";
+    const ranks = "87654321";
+
+    return files[col] + ranks[row];
+}
+
+function getPieceLetter(piece) {
+    const letters = {
+        K: "K",
+        Q: "Q",
+        R: "R",
+        B: "B",
+        N: "N",
+        P: ""
+    };
+
+    return letters[piece[1]];
+}
+
+function isCaptureMove(fromRow, fromCol, toRow, toCol, movingPiece) {
+    // Normal capture
+    if (currentPosition[toRow][toCol] !== null) {
+        return true;
+    }
+
+    // En passant
+    if (
+        movingPiece[1] === "P" &&
+        fromCol !== toCol
+    ) {
+        return true;
+    }
+
+    return false;
+}
+
+function getLegalMovesForPGN(row, col) {
+    return getLegalMoves(row, col);
+}
+
+function getDisambiguation(
+    fromRow,
+    fromCol,
+    toRow,
+    toCol,
+    movingPiece
+) {
+    const type = movingPiece[1];
+
+    // Pawns don't need normal piece disambiguation.
+    if (type === "P") {
+        return "";
+    }
+
+    const alternatives = [];
+
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            if (row === fromRow && col === fromCol) {
+                continue;
+            }
+
+            const piece = currentPosition[row][col];
+
+            if (
+                !piece ||
+                piece[0] !== movingPiece[0] ||
+                piece[1] !== type
+            ) {
+                continue;
+            }
+
+            const legalMoves = getLegalMovesForPGN(row, col);
+
+            const canReach = legalMoves.some(
+                ([moveRow, moveCol]) =>
+                    moveRow === toRow &&
+                    moveCol === toCol
+            );
+
+            if (canReach) {
+                alternatives.push([row, col]);
+            }
+        }
+    }
+
+    if (alternatives.length === 0) {
+        return "";
+    }
+
+    const sameFile = alternatives.some(
+        ([row, col]) => col === fromCol
+    );
+
+    const sameRank = alternatives.some(
+        ([row, col]) => row === fromRow
+    );
+
+    const files = "abcdefgh";
+
+    if (!sameFile) {
+        return files[fromCol];
+    }
+
+    if (!sameRank) {
+        return String(8 - fromRow);
+    }
+
+    return getSquareName(fromRow, fromCol);
+}
+
+function getCheckSuffix(color) {
+    const enemyColor = color === "w" ? "b" : "w";
+
+    if (isCheckmate(enemyColor)) {
+        return "#";
+    }
+
+    if (isInCheck(enemyColor)) {
+        return "+";
+    }
+
+    return "";
+}
+
+function createPGNMove(
+    fromRow,
+    fromCol,
+    toRow,
+    toCol,
+    movingPiece,
+    promotion = null,
+    capturedPiece = null,
+    wasEnPassant = false,
+    wasCastling = false
+) {
+    const color = movingPiece[0];
+    const type = movingPiece[1];
+
+    /*
+     * Castling
+     */
+    if (wasCastling) {
+        if (toCol > fromCol) {
+            return "O-O";
+        }
+
+        return "O-O-O";
+    }
+
+    const capture = capturedPiece !== null || wasEnPassant;
+
+    let notation = "";
+
+    /*
+     * Pawn
+     */
+    if (type === "P") {
+        if (capture) {
+            const files = "abcdefgh";
+
+            notation += files[fromCol];
+            notation += "x";
+        }
+
+        notation += getSquareName(toRow, toCol);
+
+        if (promotion) {
+            notation += "=" + promotion;
+        }
+    }
+
+    /*
+     * Piece
+     */
+    else {
+        notation += getPieceLetter(movingPiece);
+
+        notation += getDisambiguation(
+            fromRow,
+            fromCol,
+            toRow,
+            toCol,
+            movingPiece
+        );
+
+        if (capture) {
+            notation += "x";
+        }
+
+        notation += getSquareName(toRow, toCol);
+    }
+
+    return notation;
+}
+
+function addPGNMove(
+    fromRow,
+    fromCol,
+    toRow,
+    toCol,
+    movingPiece,
+    promotion = null,
+    capturedPiece = null,
+    wasEnPassant = false,
+    wasCastling = false
+) {
+    const notation = createPGNMove(
+        fromRow,
+        fromCol,
+        toRow,
+        toCol,
+        movingPiece,
+        promotion,
+        capturedPiece,
+        wasEnPassant,
+        wasCastling
+    );
+
+    /*
+     * movePiece() has already happened at this point,
+     * so check/checkmate can be determined from the
+     * current board.
+     */
+    const suffix = getCheckSuffix(movingPiece[0]);
+
+    pgnMoves.push(notation + suffix);
+}
+
+function getPGNResult() {
+    if (!gameOver) {
+        return "*";
+    }
+
+    if (isCheckmate(currentTurn)) {
+        // currentTurn is the player who got checkmated
+        return currentTurn === "w" ? "0-1" : "1-0";
+    }
+
+    return "1/2-1/2";
+}
+
+function generatePGN() {
+    let pgn = "";
+
+    pgn += `[Event "Local Game"]\n`;
+    pgn += `[Site "Local"]\n`;
+    pgn += `[Date "${new Date().toISOString().slice(0, 10).replace(/-/g, ".")}"]\n`;
+    pgn += `[Round "-"]\n`;
+    pgn += `[White "Player"]\n`;
+    pgn += `[Black "Minimax"]\n`;
+    pgn += `[Result "${getPGNResult()}"]\n`;
+    pgn += "\n";
+
+    for (let i = 0; i < pgnMoves.length; i++) {
+        if (i % 2 === 0) {
+            pgn += `${Math.floor(i / 2) + 1}. `;
+        }
+
+        pgn += pgnMoves[i];
+
+        if (i < pgnMoves.length - 1) {
+            pgn += " ";
+        }
+    }
+
+    pgn += ` ${getPGNResult()}`;
+
+    return pgn;
+}
+
+function logPGN() {
+    console.log(
+        "%cPGN:",
+        "font-weight: bold;"
+    );
+
+    console.log(generatePGN());
+}
+
 function promotePawn(row, col, fromRow, fromCol, movingPiece) {
     const pawn = currentPosition[row][col];
 
@@ -160,7 +442,21 @@ function promotePawn(row, col, fromRow, fromCol, movingPiece) {
 
             currentPosition[row][col] = color + choice;
 
-            renderBoard()
+            renderBoard();
+
+            pgnMoves.push(
+                createPGNMove(
+                    fromRow,
+                    fromCol,
+                    row,
+                    col,
+                    movingPiece,
+                    choice,
+                    null,
+                    false,
+                    false
+                ) + getCheckSuffix(movingPiece[0])
+            );
 
             promotionSquare = null;
             promotionScreen.classList.add("hidden");
@@ -172,7 +468,8 @@ function promotePawn(row, col, fromRow, fromCol, movingPiece) {
                 fromCol,
                 row,
                 col,
-                movingPiece
+                movingPiece,
+                choice
             );
         });
     });
@@ -844,6 +1141,7 @@ function resetGame() {
     gameOver = false;
     halfmoveClock = 0;
     positionHistory = [];
+    pgnMoves = [];
 
     clearMoveHighlights();
 
@@ -941,11 +1239,20 @@ function completeMove(fromRow, fromCol, toRow, toCol, movingPiece) {
     }
 }
 
-function movePiece(fromRow, fromCol, toRow, toCol, promotionPiece=null) {
+function movePiece(
+    fromRow,
+    fromCol,
+    toRow,
+    toCol,
+    promotionPiece = null
+) {
     const movingPiece = currentPosition[fromRow][fromCol];
 
+    const capturedPiece = currentPosition[toRow][toCol];
+
     const isPawnMove = movingPiece[1] === "P";
-    const isCapture = currentPosition[toRow][toCol] !== null;
+
+    const isCapture = capturedPiece !== null;
 
     const isCastling =
         movingPiece[1] === "K" &&
@@ -956,45 +1263,89 @@ function movePiece(fromRow, fromCol, toRow, toCol, promotionPiece=null) {
         toCol !== fromCol &&
         currentPosition[toRow][toCol] === null;
 
+    /*
+     * Remember the captured pawn for en passant.
+     */
+    let enPassantCapturedPiece = null;
+
+    if (isEnPassant) {
+        enPassantCapturedPiece =
+            currentPosition[fromRow][toCol];
+    }
+
     updateCastlingRights(
         fromRow,
         fromCol,
         toRow,
         toCol
     );
-            
+
     currentPosition[toRow][toCol] = movingPiece;
 
     if (promotionPiece) {
-        currentPosition[toRow][toCol] = movingPiece[0]+promotionPiece;
+        currentPosition[toRow][toCol] =
+            movingPiece[0] + promotionPiece;
     }
 
     currentPosition[fromRow][fromCol] = null;
 
-    if (isPawnMove || isCapture) {
+    if (isPawnMove || isCapture || isEnPassant) {
         halfmoveClock = 0;
     } else {
         halfmoveClock++;
     }
-    
+
+    /*
+     * En passant capture.
+     */
     if (isEnPassant) {
         currentPosition[fromRow][toCol] = null;
     }
-    
+
+    /*
+     * Castling.
+     */
     if (isCastling) {
         if (toCol === 6) {
             // Kingside
-            currentPosition[toRow][5] = currentPosition[toRow][7];
+            currentPosition[toRow][5] =
+                currentPosition[toRow][7];
+
             currentPosition[toRow][7] = null;
         } else if (toCol === 2) {
             // Queenside
-            currentPosition[toRow][3] = currentPosition[toRow][0];
+            currentPosition[toRow][3] =
+                currentPosition[toRow][0];
+
             currentPosition[toRow][0] = null;
         }
     }
 
+    /*
+     * Generate PGN notation BEFORE changing the turn.
+     */
+    if (!(
+        movingPiece[1] === "P" &&
+        (toRow === 0 || toRow === 7) &&
+        !promotionPiece
+    )) {
+        addPGNMove(
+            fromRow,
+            fromCol,
+            toRow,
+            toCol,
+            movingPiece,
+            promotionPiece,
+            capturedPiece || enPassantCapturedPiece,
+            isEnPassant,
+            isCastling
+        );
+    }
+
     return {
-        promotion: movingPiece[1] === "P" && (toRow === 0 || toRow === 7)
+        promotion:
+            movingPiece[1] === "P" &&
+            (toRow === 0 || toRow === 7)
     };
 }
 
