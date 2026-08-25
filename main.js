@@ -33,8 +33,8 @@ let lastMove = null;
 let halfmoveClock = 0;
 let positionHistory = [];
 const gameMode = {
-    b: "player",
-    w: "bot/sixseven"
+    w: "player",
+    b: "player"
 };
 
 let castlingRights = {
