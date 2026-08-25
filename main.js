@@ -933,9 +933,11 @@ function completeMove(fromRow, fromCol, toRow, toCol, movingPiece) {
         !gameOver &&
         gameMode[currentTurn].slice(0, 4) === "bot/"
     ) {
-        makeBotMove(
-            gameMode[currentTurn].slice(4)
-        );
+        setTimeout(() => {
+            makeBotMove(
+                gameMode[currentTurn].slice(4)
+            );
+        }, 0);
     }
 }
 
