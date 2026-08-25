@@ -1032,6 +1032,8 @@ squares.forEach((square, index) => {
 
         if (isLegal) {
 
+            console.time("player move");
+
             const movingPiece = currentPosition[selectedRow][selectedCol];
 
             const moveResult = movePiece(
@@ -1041,7 +1043,11 @@ squares.forEach((square, index) => {
                 col
             );
 
+            console.timeLog("player move", "after movePiece");
+
             renderBoard()
+
+            console.timeLog("player move", "after renderBoard");
 
             if (moveResult.promotion) {
                 waitingForPromotion = true;
@@ -1063,6 +1069,8 @@ squares.forEach((square, index) => {
                 movingPiece
                 );
             }
+
+            console.timeEnd("player move");
         }
 
         selectedSquare.classList.remove("selected");
