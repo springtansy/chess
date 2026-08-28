@@ -12,7 +12,7 @@ const pieceValues = {
     B: 300,
     R: 500,
     Q: 900,
-    K: 100000000
+    K: 100000000000
 };
 
 const PAWN_TABLE = [
@@ -315,9 +315,9 @@ function minimax(
     if (moves.length === 0) {
         if (isInCheck(color)) {
             if (maximizingPlayer) {
-                return -pieceValues.K + depth;
+                return -pieceValues.K + depth * 10000;
             } else {
-                return pieceValues.K - depth;
+                return pieceValues.K - depth * 10000;
             }
         }
 
