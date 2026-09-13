@@ -164,3 +164,27 @@ h1 {
     background-color: #332b25;
     border-color: #b58863;
 }
+
+#start-game {
+    width: 100%;
+
+    margin-top: 25px;
+    padding: 15px;
+
+    background-color: #b58863;
+    color: white;
+
+    border: none;
+    border-radius: 10px;
+
+    font-size: 18px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: background-color 0.15s;
+}
+
+#start-game:hover {
+    background-color: #c79a78;
+}
