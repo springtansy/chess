@@ -9,8 +9,23 @@
 
     <main class="menu">
         <h1>Chess</h1>
-        <a href="game">Play Game</a>    
+
+        <div class="game-modes">
+            <button class="selected">Play White</button>
+            <button>Play Black</button>
+            <button>2 Players</button>
+        </div>
+
+        <div class="bot-selection">
+            <h2>Choose your opponent</h2>
+
+            <div class="bot-list" id="bot-list"></div>
+        </div>
+
+        <a href="game">Start Game</a>
     </main>
+
+    <script src="menu.js"></script>
 
 </body>
 </html>
