@@ -27,15 +27,28 @@ const startingPosition = [
     ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]
 ];
 
+const params = new URLSearchParams(window.location.search);
+
+const style = params.get("style") || "twoplayer";
+const botName = params.get("botName") || "minimax";
+
 let currentPosition = startingPosition.map(row => [...row]);
 
 let lastMove = null;
 let halfmoveClock = 0;
 let positionHistory = [];
+
 const gameMode = {
     w: "player",
     b: "player"
 };
+
+if (style === "whitebot") {
+    gameMode.b = `bot/${botName}`;
+}
+else if (style === "blackbot") {
+    gameMode.w = `bot/${botName}`;
+}
 
 let castlingRights = {
     wK: true,
