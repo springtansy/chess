@@ -27,6 +27,21 @@ const bots = [
 
 let selectedBot = "minimax";
 
+const modeButtons = document.querySelectorAll(".game-modes button");
+
+modeButtons.forEach(button => {
+    button.addEventListener("click", () => {
+
+        modeButtons.forEach(button => {
+            button.classList.remove("selected");
+        });
+
+        button.classList.add("selected");
+
+        selectedStyle = button.dataset.style;
+    });
+});
+
 
 const botList = document.getElementById("bot-list");
 
@@ -75,4 +90,18 @@ bots.forEach(bot => {
 
         selectedBot = bot.id;
     });
+});
+
+const startButton = document.getElementById("start-game");
+
+startButton.addEventListener("click", () => {
+    const params = new URLSearchParams();
+
+    params.set("style", selectedStyle);
+
+    if (selectedStyle !== "twoplayer") {
+        params.set("botName", selectedBot);
+    }
+
+    window.location.href = `game?${params.toString()}`;
 });
