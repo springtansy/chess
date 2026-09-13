@@ -11,9 +11,9 @@
         <h1>Chess</h1>
 
         <div class="game-modes">
-            <button class="selected">Play White</button>
-            <button>Play Black</button>
-            <button>2 Players</button>
+            <button class="selected" data-style="whitebot">Play White</button>
+            <button data-style="blackbot">Play Black</button>
+            <button data-style="twoplayer">2 Players</button>
         </div>
 
         <div class="bot-selection">
@@ -22,7 +22,7 @@
             <div class="bot-list" id="bot-list"></div>
         </div>
 
-        <a href="game">Start Game</a>
+        <button id="start-game">Start Game</button>    
     </main>
 
     <script src="menu.js"></script>
