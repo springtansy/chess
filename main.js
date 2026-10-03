@@ -1191,9 +1191,11 @@ function resetGame() {
         !gameOver &&
         gameMode[currentTurn].slice(0, 4) === "bot/"
     ) {
-        makeBotMove(
-            gameMode[currentTurn].slice(4)
-        );
+        setTimeout(() => {
+            makeBotMove(
+                gameMode[currentTurn].slice(4)
+            );
+        }, 100);
     }
 }
 
@@ -1254,7 +1256,7 @@ function completeMove(fromRow, fromCol, toRow, toCol, movingPiece) {
             makeBotMove(
                 gameMode[currentTurn].slice(4)
             );
-        }, 0);
+        }, 100);
     }
 }
 
