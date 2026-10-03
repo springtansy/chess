@@ -31,6 +31,8 @@ const params = new URLSearchParams(window.location.search);
 
 const style = params.get("style") || "twoplayer";
 const botName = params.get("botName") || "minimax";
+const botNameW = params.get("botNameW") || "minimax";
+const botNameB = params.get("botNameB") || "minimax";
 
 let currentPosition = startingPosition.map(row => [...row]);
 
@@ -48,6 +50,10 @@ if (style === "whitebot") {
 }
 else if (style === "blackbot") {
     gameMode.w = `bot/${botName}`;
+}
+else if (style === "twobot") {
+    gameMode.w = `bot/${botNameW}`;
+    gameMode.b = `bot/${botNameW}`;
 }
 
 let castlingRights = {
