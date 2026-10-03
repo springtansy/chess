@@ -53,7 +53,7 @@ else if (style === "blackbot") {
 }
 else if (style === "twobot") {
     gameMode.w = `bot/${botNameW}`;
-    gameMode.b = `bot/${botNameW}`;
+    gameMode.b = `bot/${botNameB}`;
 }
 
 let castlingRights = {
