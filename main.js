@@ -56,8 +56,8 @@ else if (style === "twobot") {
     gameMode.b = `bot/${botNameB}`;
 }
 
-console.log(gamemode.w)
-console.log(gamemode.b)
+console.log(gameMode.w);
+console.log(gameMode.b);
 
 let castlingRights = {
     wK: true,
