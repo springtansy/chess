@@ -296,32 +296,25 @@ function undoSearchMove(undo) {
     };
 }
 
-function minimax(
-    depth,
-    alpha,
-    beta,
-    maximizingPlayer
-) {
-    if (depth === 0) {
-        return evaluatePosition();
-    }
-
-    const color =
-        maximizingPlayer ? "w" : "b";
-
+function minimax(depth, alpha, beta, maximizingPlayer) {
+    const color = maximizingPlayer ? "w" : "b";
     const moves = getAllLegalMoves(color);
 
-    // Checkmate / stalemate
+    // 1. Checkmate / Stalemate terminal check FIRST
     if (moves.length === 0) {
         if (isInCheck(color)) {
             if (maximizingPlayer) {
-                return -pieceValues.K + depth * 10000;
-            } else {
-                return pieceValues.K - depth * 10000;
+                return -pieceValues.K - depth * 10000;
+            } 
+            else {
+                return pieceValues.K + depth * 10000;
             }
         }
-
         return 0;
+    }
+
+    if (depth === 0) {
+        return evaluatePosition();
     }
 
     if (maximizingPlayer) {
@@ -329,25 +322,28 @@ function minimax(
 
         for (const move of moves) {
             const undo = makeSearchMove(move);
-
-            const value = minimax(
-                depth - 1,
-                alpha,
-                beta,
-                false
-            );
-
+            const value = minimax(depth - 1, alpha, beta, false);
             undoSearchMove(undo);
 
-            bestValue = Math.max(
-                bestValue,
-                value
-            );
+            bestValue = Math.max(bestValue, value);
+            alpha = Math.max(alpha, bestValue);
 
-            alpha = Math.max(
-                alpha,
-                bestValue
-            );
+            if (beta <= alpha) {
+                break;
+            }
+        }
+
+        return bestValue;
+    } else {
+        let bestValue = Infinity;
+
+        for (const move of moves) {
+            const undo = makeSearchMove(move);
+            const value = minimax(depth - 1, alpha, beta, true);
+            undoSearchMove(undo);
+
+            bestValue = Math.min(bestValue, value);
+            beta = Math.min(beta, bestValue);
 
             if (beta <= alpha) {
                 break;
@@ -356,37 +352,6 @@ function minimax(
 
         return bestValue;
     }
-
-    let bestValue = Infinity;
-
-    for (const move of moves) {
-        const undo = makeSearchMove(move);
-
-        const value = minimax(
-            depth - 1,
-            alpha,
-            beta,
-            true
-        );
-
-        undoSearchMove(undo);
-
-        bestValue = Math.min(
-            bestValue,
-            value
-        );
-
-        beta = Math.min(
-            beta,
-            bestValue
-        );
-
-        if (beta <= alpha) {
-            break;
-        }
-    }
-
-    return bestValue;
 }
 
 function makeBotMove(botName) {
