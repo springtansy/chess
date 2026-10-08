@@ -76,14 +76,14 @@ h1 {
     color: #f0d9b5;
 }
 
+.bot-selection.hidden {
+    display: none;
+}
+
 .bot-list {
     display: flex;
     flex-direction: column;
     gap: 10px;
-}
-
-.bot-list.hidden {
-    display: none;
 }
 
 .bot-card {
