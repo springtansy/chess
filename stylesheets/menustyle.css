@@ -82,6 +82,10 @@ h1 {
     gap: 10px;
 }
 
+.bot-list.hidden {
+    display: none;
+}
+
 .bot-card {
     width: 100%;
 
