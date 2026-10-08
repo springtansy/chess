@@ -29,6 +29,7 @@ let selectedBot = "minimax";
 let selectedStyle = "whitebot";
 
 const botList = document.getElementById("bot-list");
+const botSelection = document.getElementById("bot-selection");
 
 const modeButtons = document.querySelectorAll(".game-modes button");
 
@@ -42,13 +43,13 @@ modeButtons.forEach(button => {
         button.classList.add("selected");
 
         if (selectedStyle === "twoplayer") {
-            botList.classList.remove("hidden")
+            botSelection.classList.remove("hidden")
         }
 
         selectedStyle = button.dataset.style;
 
         if (selectedStyle === "twoplayer") {
-            botList.classList.add("hidden")
+            botSelection.classList.add("hidden")
         }
     });
 });
