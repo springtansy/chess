@@ -26,6 +26,7 @@ const bots = [
 
 
 let selectedBot = "minimax";
+let selectedStyle = "whitebot";
 
 const botList = document.getElementById("bot-list");
 
