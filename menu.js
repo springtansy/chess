@@ -40,13 +40,13 @@ modeButtons.forEach(button => {
 
         button.classList.add("selected");
 
-        if (selectedStyle = "twoplayer") {
+        if (selectedStyle === "twoplayer") {
             botList.classList.remove("hidden")
         }
 
         selectedStyle = button.dataset.style;
 
-        if (selectedStyle = "twoplayer") {
+        if (selectedStyle === "twoplayer") {
             botList.classList.add("hidden")
         }
     });
