@@ -27,6 +27,8 @@ const bots = [
 
 let selectedBot = "minimax";
 
+const botList = document.getElementById("bot-list");
+
 const modeButtons = document.querySelectorAll(".game-modes button");
 
 modeButtons.forEach(button => {
@@ -38,13 +40,17 @@ modeButtons.forEach(button => {
 
         button.classList.add("selected");
 
+        if (selectedStyle = "twoplayer") {
+            botList.classList.remove("hidden")
+        }
+
         selectedStyle = button.dataset.style;
+
+        if (selectedStyle = "twoplayer") {
+            botList.classList.add("hidden")
+        }
     });
 });
-
-
-const botList = document.getElementById("bot-list");
-
 
 bots.forEach(bot => {
     const card = document.createElement("button");
